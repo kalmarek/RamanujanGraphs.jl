@@ -1,0 +1,4 @@
+name = "RamanujanGraphs"
+uuid = "e7bd6bc6-b6b8-11e9-1ec2-2f89442c0d6c"
+authors = ["kalmarek <kalmar@amu.edu.pl>"]
+version = "0.1.0"
