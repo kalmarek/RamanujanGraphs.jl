@@ -55,7 +55,7 @@ end
 generator(a,b,c,d, x,y) = [a + b*x + d*y -b*y + c + d*x
 			     -b*y - c + d*x a - b*x- d*y]
 
-function LPS_generators(p::Integer, q::Integer)
+function lps_generators(p::Integer, q::Integer)
     x,y = hyperboloid_solution(q)
     @assert (x^2 + y^2 + 1) %q == 0
 

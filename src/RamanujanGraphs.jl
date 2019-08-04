@@ -4,7 +4,7 @@ using LinearAlgebra
 using Combinatorics
 using LightGraphs
 
-export LPS_generators, cayley_graph, PGL₂, PSL₂
+export PGL₂, PSL₂, lps_generators, cayley_graph
 
 include("gl2.jl")
 include("lps_generators.jl")
@@ -23,7 +23,7 @@ end
 
 function reduced_generating_set(S::AbstractVector)
     @assert all((!isone).(S))
-    rS = Set{T}()
+    rS = Set{eltype(S)}()
     for s in S
         s^2 == s && push!(rS, s)
         inv(s) in rS && continue
@@ -45,8 +45,10 @@ function cayley_graph(S::AbstractVector{T}; radius::Integer=3) where T
     elabels = Dict{Tuple{Int, Int}, T}()
 
     for (idx,g) in enumerate(vertices)
-        for s in rS
-            add_edge!(cayley, vlabels[g], vlabels[g*s])
+        for s in S
+            src = vlabels[g]
+            dst = vlabels[g*s] # assuming it exists
+            add_edge!(cayley, src, dst)
         end
     end
 
