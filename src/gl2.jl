@@ -36,7 +36,7 @@ function Base.sqrt(n::IntMod{q}) where q
     end
 end
 
-abstract type GL₂{q} <: AbstractMatrix{Int} end
+abstract type GL₂{q} <: AbstractMatrix{IntMod} end
 
 Base.size(::GL₂) = (2,2)
 Base.length(::GL₂) = 4
@@ -53,13 +53,29 @@ function Base.getindex(m::GL₂, i::Integer)
     i == 4 && return m.d
 end
 
-function Base.:(==)(m::T, n::T) where T <: GL₂
-    return all(normalform!(m)[i] == normalform!(n)[i] for i in eachindex(m))
+function Base.setindex!(m::GL₂{q}, v, i::Integer) where q
+    if i == 1
+        m.a = v
+    elseif i == 2
+        m.c = v
+    elseif i == 3
+        m.b = v
+    elseif i == 4
+        m.d = v
+    end
+    return v
 end
 
-function Base.hash(m::PT, h::UInt) where {q, PT<:GL₂{q}}
+function Base.:(==)(m::T, n::T) where T <: GL₂
     m = normalform!(m)
-    return hash(PT, hash(q, hash(m.a, hash(m.b, hash(m.c, hash(m.d, h))))))
+    n = normalform!(n)
+    return all(m[i] == n[i] for i in eachindex(m))
+end
+
+function Base.hash(m::T, h::UInt) where {q, T<:GL₂{q}}
+    return UInt(h)
+    m = normalform!(m)
+    return hash(T, hash(q, hash(m[1], hash(m[2], hash(m[3], hash(m[4], h))))))
 end
 
 function Base.:(*)(m::T, n::T) where T <: GL₂
@@ -67,17 +83,17 @@ function Base.:(*)(m::T, n::T) where T <: GL₂
     b = m[1,1]*n[1,2] + m[1,2]*n[2,2]
     c = m[2,1]*n[1,1] + m[2,2]*n[2,1]
     d = m[2,1]*n[1,2] + m[2,2]*n[2,2]
-    return normalform!(T(a,c,b,d))
+    return T(a,c,b,d)
 end
 
-LinearAlgebra.det(m::GL₂{q}) where q = modd(m[1,1]*m[2,2] - m[2,1]*m[1,2], q)
+LinearAlgebra.det(m::GL₂{q}) where q = m[1,1]*m[2,2] - m[2,1]*m[1,2]
 
 function Base.inv(m::T) where {q, T <: GL₂{q}}
-    D = modd(det(m), q)
-    D == 0 && throw(ArgumentError("Element is not invertible!\n $m"))
-    D¯¹ = invmod(D, q)
+    p = det(m)
+    p == 0 && throw(ArgumentError("Element is not invertible!\n $m"))
+    p¯¹ = inv(p)
 
-    return T(D¯¹*m.d, -D¯¹*m.c, -D¯¹*m.b, D¯¹*m.a)
+    return T(p¯¹*m.d, -p¯¹*m.c, -p¯¹*m.b, p¯¹*m.a)
 end
 
 ############################################
@@ -87,43 +103,37 @@ end
 ############################################
 
 mutable struct PGL₂{q} <: GL₂{q}
-    a::Int
-    c::Int
-    b::Int
-    d::Int
+    a::IntMod{q}
+    c::IntMod{q}
+    b::IntMod{q}
+    d::IntMod{q}
 
     function PGL₂{q}(a,c,b,d) where q
         @assert q isa Integer
         q > 1 || error("q (the modulus) must be > 1")
-        a,c,b,d = modd(a,q), modd(c,q), modd(b,q), modd(d, q)
         m = new{q}(a,c,b,d)
         m = normalform!(m)
         @assert det(m) ≠ 0
         return m
     end
 
-    PGL₂{q}(m::AbstractMatrix{<:Integer}) where q = PGL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
+    PGL₂{q}(m::AbstractMatrix) where q = PGL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
-isnormal_pgl2(a,c,b,d) = a == 1 || (a == 0 && c == 1)
-isnormal(m::PGL₂) = isnormal_pgl2(m...)
+isnormal(m::PGL₂) = m[1] == 1 || (m[1] == 0 && m[2] == 1)
 
-function normalform_pgl2(q, a,c,b,d)
-    isnormal_pgl2(a,c,b,d) && return (a,c,b,d)
-    if a ≠ 0
-        a¯¹ = invmod(a, q)
-        return modd.((1, a¯¹*c, a¯¹*b, a¯¹*d), q)
-    elseif a == 0
-        c¯¹ = invmod(c, q)
-        return modd.((0,     1, c¯¹*b, c¯¹*d), q)
-    else
-        error("The first element of quadruple should be non-negative")
-    end
-end
-
-function normalform!(m::PGL₂{q}) where q
+function normalform!(m::PGL₂)
     isnormal(m) && return m
-    m.a, m.c, m.b, m.d = normalform_pgl2(q, m...)
+    if m[1] ≠ 0
+        a = inv(m[1])
+    elseif m[2] ≠ 0
+        a = inv(m[2])
+    else
+        error("The first column of $(typeof(m)) matrix must be non-zero! $m")
+    end
+    for i in eachindex(m)
+        m[i] = a*m[i]
+    end
     return m
 end
 
@@ -135,41 +145,52 @@ order(::Type{PGL₂{q}}) where q = q^3 - q
 #
 ############################################
 mutable struct PSL₂{q} <: GL₂{q}
-    a::Int
-    c::Int
-    b::Int
-    d::Int
+    a::IntMod{q}
+    c::IntMod{q}
+    b::IntMod{q}
+    d::IntMod{q}
 
     function PSL₂{q}(a,c,b,d) where q
         @assert q isa Integer
         q > 1 || error("$q (the modulus) must be > 1")
-        a,c,b,d = modd(a,q), modd(c,q), modd(b,q), modd(d, q)
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        @assert det(m) == 1
+        @assert det(m) == 1 "m = $m, det(m) = $(det(m))"
+        @assert m[1] <= div(q-1,2) "m = $m is not in normal form!"
         return m
     end
 
-    PSL₂{q}(m::AbstractMatrix{<:Integer}) where q = PSL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
+    PSL₂{q}(m::AbstractMatrix) where q = PSL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
-isnormal_psl2(q, a,c,b,d) = modd(a*d - c*b, q) == 1 && a <= div(q-1,2)
-isnormal(m::PSL₂{q}) where q = isnormal_psl2(q, m...)
-
-function normalform_psl2(q, a,c,b,d)
-    isnormal_psl2(q, a,c,b,d) && return (a,c,b,d)
-    D = a*d - c*b
-    sqrtD = sqrtmod(D, q)
-    sqrtD¯¹ = invmod(sqrtD, q)
-    if modd(sqrtD¯¹*a, q) > div(q-1,2)
-        sqrtD¯¹ *= -1
+function isnormal(m::PSL₂{q}) where q
+    det(m) == 1 || return false
+    if 0 < m[1] <= div(q-1,2)
+        return true
+    elseif m[1] == 0 && 0 < m[2] <= div(q-1,2)
+        return true
+    else
+        return false
     end
-    return modd.((sqrtD¯¹*a, sqrtD¯¹*c, sqrtD¯¹*b, sqrtD¯¹*d), q)
 end
 
 function normalform!(m::PSL₂{q}) where q
     isnormal(m) && return m
-    m.a, m.c, m.b, m.d = normalform_psl2(q, m...)
+    old_m = deepcopy(m)
+    p = det(m)
+
+    x = sqrt(p)
+    xinv = inv(x)
+
+    elt = (m[1] ≠ 0 ? m[1] : m[2])
+
+    if xinv*elt > div(q-1, 2)
+        xinv *= -1
+    end
+
+    for i in eachindex(m)
+        m[i] = xinv*m[i]
+    end
     return m
 end
 
