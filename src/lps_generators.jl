@@ -43,6 +43,16 @@ function quadruples_4k_plus3(p::Integer)
     return quads
 end
 
+function quadruples(p::Integer)
+	@assert p>0
+	@assert isprime(p)
+	if p % 4 == 1
+		return quadruples_4k_plus1(p)
+	elseif p % 4 == 3
+		return quadruples_4k_plus3(p)
+	end
+end
+
 function hyperboloid_solution(q::Integer, b=1)
     for x in 0:q
         x² = x^2
@@ -54,12 +64,10 @@ function hyperboloid_solution(q::Integer, b=1)
     throw("a solution should always exist in finite field!")
 end
 
-generator(a,b,c,d, x,y) = [a + b*x + d*y -b*y + c + d*x
-			     -b*y - c + d*x a - b*x- d*y]
+generator(a₀,a₁,a₂,a₃,i) = [a₀ + i*a₁  a₂ + i*a₃;
+			     			-a₂ + i*a₃ a₀ - i*a₁]
 
 function lps_generators(p::Integer, q::Integer)
-    x,y = hyperboloid_solution(q)
-    @assert (x^2 + y^2 + 1) %q == 0
 	@assert p > 2
 	@assert q > 2
 	@assert p ≠ q
@@ -68,11 +76,9 @@ function lps_generators(p::Integer, q::Integer)
 	@assert p % 4 == 1
 	@assert q % 4 == 1
 
-    if p % 4 == 1
-        mats = [generator(a,b,c,d,x,y) for (a,b,c,d) in quadruples_4k_plus1(p)]
-    elseif p % 4 == 3
-        mats = [generator(a,b,c,d,x,y) for (a,b,c,d) in quadruples_4k_plus3(p)]
-    end
+	i = sqrt(IntMod{q}(q-1))
+
+	mats = [generator(a₀,a₁,a₂,a₃,i) for (a₀,a₁,a₂,a₃) in quadruples(p)]
 
     legendre = legendresymbol(p,q)
     if legendre == -1
