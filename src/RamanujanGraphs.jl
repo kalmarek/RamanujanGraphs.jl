@@ -36,7 +36,7 @@ function cayley_graph(S::AbstractVector{T}; radius::Integer=3) where T
     @assert all((!isone).(S))
     # @assert all(inv(s) in S for s in S)
 
-    vertices, sizes = generate_balls(unique([S; inv.(S)]), radius=radius)
+    @time vertices, sizes = generate_balls(unique([S; inv.(S)]), radius=radius)
     @info "Generated balls of radii" sizes
 
     cayley = SimpleGraph(length(vertices))
@@ -44,7 +44,7 @@ function cayley_graph(S::AbstractVector{T}; radius::Integer=3) where T
 
     elabels = Dict{Tuple{Int, Int}, T}()
 
-    for (idx,g) in enumerate(vertices)
+    @time for (idx,g) in enumerate(vertices)
         for s in S
             src = vlabels[g]
             dst = vlabels[g*s] # assuming it exists
@@ -53,6 +53,53 @@ function cayley_graph(S::AbstractVector{T}; radius::Integer=3) where T
     end
 
     return cayley, vertices, vlabels
+end
+
+function LPS(p::Integer, q::Integer; radius=4)
+    S = reduced_generating_set(lps_generators(p,q))
+    return cayley_graph(S, radius=radius)
+end
+
+function cayley_graph2(S::AbstractVector{T}; radius::Integer=3) where T
+    @assert all((!isone).(S))
+    @assert all(inv(s) in S for s in S)
+    rS = reduced_generating_set(S)
+
+#     n = length(S)
+#     for (i,s) in enumerate(S)
+#         add_edge!(cayley, 1, i+1)
+#         vlabels[s] = i+1
+#         elabels[(1,i+1)] = s
+#     end
+#
+#     l = n+1
+#     for r in 2:radius
+#         for s in S
+#             for idx in 1:l
+#                 g = vertices[idx]
+#                 new_g = s*g
+#                 if !haskey(vlabels, new_g)
+#                     l += 1
+#                         @show l, new_g
+#                     add_vertex!(cayley)
+#                     vertices[l] = new_g
+#                     vlabels[new_g] = l
+#                 end
+#
+#                 if !has_edge(cayley, vlabels[g], vlabels[new_g]) && !has_edge(cayley, vlabels[new_g], vlabels[g])
+#                     add_edge!(cayley, vlabels[g], vlabels[new_g])
+#                     elabels[(vlabels[g], vlabels[new_g])] = s
+#                 end
+#             end
+#         end
+#         @show r, l
+#         if length(vertices) == l
+#             @info "Group saturated at radius $r with $(length(vertices)) elements"
+#             break
+#         end
+#     end
+
+    return cayley, vertices, vlabels#, elabels
 end
 
 end # module

@@ -58,10 +58,15 @@ end
     @test lps_generators(3, 5) isa Vector{PGL₂{5}}
     @test lps_generators(7, 5) isa Vector{PGL₂{5}}
     @test lps_generators(11, 5) isa Vector{PSL₂{5}}
+    @test lps_generators(11, 7) isa Vector{PSL₂{7}}
 
     @test length(lps_generators(3, 5)) == 4
     @test length(lps_generators(7, 5)) == 8
     @test length(lps_generators(11, 5)) == 12
+    @test length(lps_generators(13, 5)) == 14
+    @test length(lps_generators(11, 7)) == 12
+
+    @test length(lps_generators(11, 7)) == 12
 
 
     for p in [3,7,11]
@@ -82,7 +87,16 @@ end
 @testset "Cayley graphs" begin
     let (p, q) = (3, 5)
         S = lps_generators(p, q)
-        c, vertices, vlabels = cayley_graph(S, radius=6)
+        c, vertices, vlabels = cayley_graph(RamanujanGraphs.reduced_generating_set(S), radius=6)
+        @test length(vertices) == RamanujanGraphs.order(eltype(vertices))
+        @test all(isequal(p+1), degree(c))
+        @test all(v in keys(vlabels) for v in vertices)
+        @test all(vlabels[vertices[i]] == i for (g,i) in vlabels)
+    end
+
+    let (p, q) = (11, 7)
+        S = lps_generators(p, q)
+        c, vertices, vlabels = cayley_graph(RamanujanGraphs.reduced_generating_set(S), radius=6)
         @test length(vertices) == RamanujanGraphs.order(eltype(vertices))
         @test all(isequal(p+1), degree(c))
         @test all(v in keys(vlabels) for v in vertices)
