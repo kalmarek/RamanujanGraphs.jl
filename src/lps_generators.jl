@@ -41,6 +41,16 @@ function quadruples_4k_plus3(p::Integer)
     return quads
 end
 
+function quadruples(p::Integer)
+	@assert p>0
+	if p % 4 == 1
+		return quadruples_4k_plus1(p)
+	elseif p % 4 == 3
+		return quadruples_4k_plus3(p)
+	end
+	throw("$p is congruent to neither 1 nor 3 modulo 4")
+end
+
 function hyperboloid_solution(q::Integer, b=1)
     for x in 0:q
         x² = x^2
@@ -59,13 +69,9 @@ function lps_generators(p::Integer, q::Integer)
     x,y = hyperboloid_solution(q)
     @assert (x^2 + y^2 + 1) %q == 0
 
-    if p % 4 == 1
-        mats = [generator(a,b,c,d,x,y) for (a,b,c,d) in quadruples_4k_plus1(p)]
-    elseif p % 4 == 3
-        mats = [generator(a,b,c,d,x,y) for (a,b,c,d) in quadruples_4k_plus3(p)]
-    end
+	mats = [generator(a,b,c,d,x,y) for (a,b,c,d) in quadruples(p)]
 
-    legendre = legendresymbol(p,q)
+    legendre = Combinatorics.legendresymbol(p,q)
     if legendre == -1
         S = PGL₂{q}.(mats)
     elseif legendre == 1

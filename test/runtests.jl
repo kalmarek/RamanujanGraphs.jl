@@ -47,6 +47,10 @@ end
     @test length(RamanujanGraphs.quadruples_4k_plus3(7)) == 8
     @test length(RamanujanGraphs.quadruples_4k_plus3(11)) == 12
     @test length(RamanujanGraphs.quadruples_4k_plus3(19)) == 20
+
+    for p in [3,5,7,11,13,17,19,23]
+        @test length(quadruples(p)) == p+1
+    end
 end
 
 @testset "lpsgenerators" begin
