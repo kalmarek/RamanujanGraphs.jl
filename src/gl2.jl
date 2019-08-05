@@ -1,17 +1,39 @@
-function modd(n, q)
-    k = (n % q);
-    k ≥ 0 && return k
-    return k + q
+struct IntMod{q} <: Number
+    x::Int
+    function IntMod{q}(x) where q
+        k = x % q;
+        return (k >= 0 ? new{q}(k) : new{q}(k+q))
+    end
 end
 
-invmod(x, q) = modd(gcdx(x, q)[2], q)
+Base.:(==)(n::IntMod{q}, m::IntMod{q}) where q = n.x == m.x
+Base.hash(n::IntMod{q}, h::UInt) where q = hash(IntMod{q}, hash(n.x, h))
 
-function sqrtmod(x, q)
-    x = modd(x, q)
-    for i in 0:q-1
-        i^2 % q == x && return i
+Base.:+(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(n.x + m.x)
+Base.:-(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(n.x - m.x)
+Base.:*(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(n.x * m.x)
+
+Base.:-(n::IntMod{q}) where q = IntMod{q}(q-n.x)
+Base.inv(n::IntMod{q}) where q = IntMod{q}(invmod(n.x, q))
+
+Base.zero(::Type{IntMod{q}}) where q = IntMod{q}(0)
+Base.one(::Type{IntMod{q}}) where q = IntMod{q}(1)
+
+Base.promote_rule(::Type{IntMod{q}}, ::Type{I}) where {q, I<:Integer} = IntMod{q}
+
+Base.show(io::IO, n::IntMod) = print(io, n.x)
+
+Int(n::IntMod) = n.x
+isless(n::IntMod, y::Integer) = n.x < y
+
+
+function Base.sqrt(n::IntMod{q}) where q
+    l = legendresymbol(Int(n), q)
+    l == 0 && return zero(IntMod{q})
+    l == -1 && throw(ArgumentError("$(n.x) is not a square modulo $q"))
+    for i in 1:q
+        i^2 % q == n.x && return IntMod{q}(i)
     end
-    throw(ArgumentError("No square root of $x modulo $q exists!"))
 end
 
 abstract type GL₂{q} <: AbstractMatrix{Int} end
