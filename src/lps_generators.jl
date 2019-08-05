@@ -1,5 +1,6 @@
 function quadruples_4k_plus1(p::Integer)
     @assert p % 4 == 1
+	@assert isprime(p)
     N = floor(Int, sqrt(p))
     N = iseven(N) ? N : N+1
     quads = NTuple{4, Int}[]
@@ -21,6 +22,7 @@ end
 
 function quadruples_4k_plus3(p::Integer)
     @assert p % 4 == 3
+	@assert isprime(p)
     N = floor(Int, sqrt(p))
     N = iseven(N) ? N+1 : N
     quads = NTuple{4, Int}[]
@@ -58,6 +60,13 @@ generator(a,b,c,d, x,y) = [a + b*x + d*y -b*y + c + d*x
 function lps_generators(p::Integer, q::Integer)
     x,y = hyperboloid_solution(q)
     @assert (x^2 + y^2 + 1) %q == 0
+	@assert p > 2
+	@assert q > 2
+	@assert p ≠ q
+	@assert isprime(p)
+	@assert isprime(q)
+	@assert p % 4 == 1
+	@assert q % 4 == 1
 
     if p % 4 == 1
         mats = [generator(a,b,c,d,x,y) for (a,b,c,d) in quadruples_4k_plus1(p)]

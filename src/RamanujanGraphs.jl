@@ -1,5 +1,6 @@
 module RamanujanGraphs
 
+using Primes
 using LinearAlgebra
 using Combinatorics
 using LightGraphs
