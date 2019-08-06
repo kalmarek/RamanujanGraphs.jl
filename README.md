@@ -16,8 +16,8 @@ where
    - `(q³ - q)/2` vertices if `p` is a square modulo `q` (Cayley graph of `PSL₂(q)`)
  * `verts` is a plain array of vertices (=group elements)
  * `vlabels` is a labelling dictionary for vertices: group element pointing to its vertex in the graph
- * elabels is a dictionary for edges:
-   - a tuple of integers `(src, dst)` points to a GENERATOR `g` of the group iff `verts[src]^-1*verts[dst] == g`, i.e. if we travel from `src` to `dst` by multiplying `src` by `g` on the right.
+ * `elabels` is a dictionary for edges:
+   - a tuple of integers `(src, dst)` points to a generator `g` of the group iff `verts[src]^-1*verts[dst] == g`, i.e. if we travel from `src` to `dst` by multiplying `src` by `g` on the right. Note that only one of `(src, dst)` and `(dst, src)` is stored.
 
 Timings:
 
@@ -27,15 +27,15 @@ julia> using RamanujanGraphs
 
 julia> using RamanujanGraphs.LightGraphs
 
-julia> @time G, verts, vlabels, elabels = LPS(13, 61); @info "Cayley Graph of $eltype(verts):" degree=length(neighbors(G,1)) size=nv(G)
-  2.597834 seconds (2.05 M allocations: 320.664 MiB, 20.40% gc time)
-┌ Info: Cayley Graph of eltype(verts):
+julia> @time G, verts, vlabels, elabels = LPS(13, 61); @info "Cayley Graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
+  4.737794 seconds (7.52 M allocations: 599.736 MiB, 10.69% gc time)
+┌ Info: Cayley Graph of PSL₂{61}:
 │   degree = 14
 └   size = 113460
 
-julia> @time G, verts, vlabels, elabels = LPS(13, 61); @info "Cayley Graph of $eltype(verts):" degree=length(neighbors(G,1)) size=nv(G)
-  2.507784 seconds (2.05 M allocations: 320.664 MiB, 19.57% gc time)
-┌ Info: Cayley Graph of eltype(verts):
+julia> @time G, verts, vlabels, elabels = LPS(13, 61); @info "Cayley Graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
+  2.326424 seconds (2.05 M allocations: 320.664 MiB, 20.25% gc time)
+┌ Info: Cayley Graph of PSL₂{61}:
 │   degree = 14
 └   size = 113460
 
