@@ -53,17 +53,6 @@ function quadruples(p::Integer)
 	end
 end
 
-function hyperboloid_solution(q::Integer, b=1)
-    for x in 0:q
-        x² = x^2
-        for y in 0:q
-            y² = y^2
-            iszero((x² + y² + b) % q) && return x, y
-        end
-    end
-    throw("a solution should always exist in finite field!")
-end
-
 generator(a₀,a₁,a₂,a₃,i) = [a₀ + i*a₁  a₂ + i*a₃;
 			     			-a₂ + i*a₃ a₀ - i*a₁]
 
