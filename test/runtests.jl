@@ -81,22 +81,36 @@ end
 end
 
 
-@testset "Cayley graphs" begin
+@testset "Cayley" begin
     let (p, q) = (13, 5)
         S = lps_generators(p, q)
-        c, vertices, vlabels = cayley_graph(RamanujanGraphs.reduced_generating_set(S), radius=6)
-        @test length(vertices) == RamanujanGraphs.order(eltype(vertices))
+
+        c, vs, vls, els = cayley_graph(S, radius=6)
+        @test length(vs) == RamanujanGraphs.order(eltype(vs))
         @test all(isequal(p+1), LightGraphs.degree(c))
-        @test all(v in keys(vlabels) for v in vertices)
-        @test all(vlabels[vertices[i]] == i for (g,i) in vlabels)
+        @test all(v in keys(vls) for v in vs)
+        @test all(vls[vs[i]] == i for i in eachindex(vs))
+
+        c, vs, vls, els = cayley_graph(RamanujanGraphs.order(eltype(S)), S)
+        @test length(vs) == RamanujanGraphs.order(eltype(vs))
+        @test all(isequal(p+1), LightGraphs.degree(c))
+        @test all(v in keys(vls) for v in vs)
+        @test all(vls[vs[i]] == i for i in eachindex(vs))
     end
 
     let (p, q) = (37, 29)
         S = lps_generators(p, q)
-        c, vertices, vlabels = cayley_graph(RamanujanGraphs.reduced_generating_set(S), radius=6)
-        @test length(vertices) == RamanujanGraphs.order(eltype(vertices))
+
+        c, vs, vls, els = cayley_graph(S, radius=6)
+        @test length(vs) == RamanujanGraphs.order(eltype(vs))
         @test all(isequal(p+1), LightGraphs.degree(c))
-        @test all(v in keys(vlabels) for v in vertices)
-        @test all(vlabels[vertices[i]] == i for (g,i) in vlabels)
+        @test all(v in keys(vls) for v in vs)
+        @test all(vls[vs[i]] == i for i in eachindex(vs))
+
+        c, vs, vls, els = cayley_graph(RamanujanGraphs.order(eltype(S)), S)
+        @test length(vs) == RamanujanGraphs.order(eltype(vs))
+        @test all(isequal(p+1), LightGraphs.degree(c))
+        @test all(v in keys(vls) for v in vs)
+        @test all(vls[vs[i]] == i for i in eachindex(vs))
     end
 end
