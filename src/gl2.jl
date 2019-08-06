@@ -145,13 +145,11 @@ isnormal(m::PGL₂) = isone(m[1]) || (iszero(m[1]) && isone(m[2]))
 function normalform!(m::PGL₂)
     isnormal(m) && return m
     if !iszero(m[1])
-        a = Int(inv(m[1]))
-    elseif !iszero(m[2])
-        a = Int(inv(m[2]))
+        a = inv(m[1])
     else
-        error("The first column of $(typeof(m)) matrix must be non-zero! $m")
+        a = inv(m[2])
     end
-    m = mul!(a, m)
+    m = mul!(Int(a), m)
     return m
 end
 
