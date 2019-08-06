@@ -1,8 +1,10 @@
 struct IntMod{q} <: Number
     x::Int
     function IntMod{q}(x) where q
-        k = x % q;
-        return (k >= 0 ? new{q}(k) : new{q}(k+q))
+        @assert q > 1
+        k = x % q
+        k = ifelse(k >=0, k, k+q)
+        return new{q}(k)
     end
 end
 
@@ -17,15 +19,17 @@ Base.:-(n::IntMod{q}) where q = IntMod{q}(q-n.x)
 Base.inv(n::IntMod{q}) where q = IntMod{q}(invmod(n.x, q))
 
 Base.zero(::Type{IntMod{q}}) where q = IntMod{q}(0)
+Base.iszero(n::IntMod{q}) where q = n.x == 0
 Base.one(::Type{IntMod{q}}) where q = IntMod{q}(1)
+Base.isone(n::IntMod{q}) where q = n.x == 1
 
 Base.promote_rule(::Type{IntMod{q}}, ::Type{I}) where {q, I<:Integer} = IntMod{q}
 
 Base.show(io::IO, n::IntMod) = print(io, n.x)
 
 Int(n::IntMod) = n.x
-isless(n::IntMod, y::Integer) = n.x < y
-
+Base.isless(n::IntMod, y::Number) = n.x < y
+Base.isless(y::Number, n::IntMod) = y < n.x
 
 function Base.sqrt(n::IntMod{q}) where q
     l = legendresymbol(Int(n), q)
@@ -34,6 +38,7 @@ function Base.sqrt(n::IntMod{q}) where q
     for i in 1:q
         i^2 % q == n.x && return IntMod{q}(i)
     end
+    return zero(n) # never hit, to keep compiler happy
 end
 
 abstract type GL₂{q} <: AbstractMatrix{IntMod} end
@@ -66,35 +71,50 @@ function Base.setindex!(m::GL₂{q}, v, i::Integer) where q
     return v
 end
 
+ints(m::GL₂) = Int(m[1]), Int(m[2]), Int(m[3]), Int(m[4])
+
 function Base.:(==)(m::T, n::T) where T <: GL₂
     m = normalform!(m)
     n = normalform!(n)
-    return all(m[i] == n[i] for i in eachindex(m))
+    return ints(m) == ints(n)
 end
 
 function Base.hash(m::T, h::UInt) where {q, T<:GL₂{q}}
-    return UInt(h)
     m = normalform!(m)
-    return hash(T, hash(q, hash(m[1], hash(m[2], hash(m[3], hash(m[4], h))))))
+    a,c,b,d = ints(m)
+    val = d + q*(b + q*(c + q^3*a)) # q-adic expression of m
+    return hash(T, hash(val, h))
 end
 
 function Base.:(*)(m::T, n::T) where T <: GL₂
-    a = m[1,1]*n[1,1] + m[1,2]*n[2,1]
-    b = m[1,1]*n[1,2] + m[1,2]*n[2,2]
-    c = m[2,1]*n[1,1] + m[2,2]*n[2,1]
-    d = m[2,1]*n[1,2] + m[2,2]*n[2,2]
-    return T(a,c,b,d)
+    a,c,b,d = ints(m)
+    A,C,B,D = ints(n)
+    new_a = a*A + b*C
+    new_b = a*B + b*D
+    new_c = c*A + d*C
+    new_d = c*B + d*D
+    return T(new_a, new_c, new_b, new_d)
 end
 
-LinearAlgebra.det(m::GL₂{q}) where q = m[1,1]*m[2,2] - m[2,1]*m[1,2]
+function mul!(x::Number, m::T) where T<:GL₂
+    m[1] = x*Int(m[1])
+    m[2] = x*Int(m[2])
+    m[3] = x*Int(m[3])
+    m[4] = x*Int(m[4])
+    return m
+end
+
+LinearAlgebra.det(m::GL₂{q}) where q = ((a,c,b,d) = ints(m); IntMod{q}(a*d-c*b))
 
 function Base.inv(m::T) where {q, T <: GL₂{q}}
-    p = det(m)
-    p == 0 && throw(ArgumentError("Element is not invertible!\n $m"))
-    p¯¹ = inv(p)
+    a,c,b,d = ints(m)
+    p = a*d - b*c
+    p¯¹ = invmod(p, q)
 
-    return T(p¯¹*m.d, -p¯¹*m.c, -p¯¹*m.b, p¯¹*m.a)
+    return T(p¯¹*d, -p¯¹*c+q, -p¯¹*b+q, p¯¹*a)
 end
+
+
 
 ############################################
 #
@@ -110,30 +130,28 @@ mutable struct PGL₂{q} <: GL₂{q}
 
     function PGL₂{q}(a,c,b,d) where q
         @assert q isa Integer
-        q > 1 || error("q (the modulus) must be > 1")
+        q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        @assert det(m) ≠ 0
+        det(m) ≠ 0 || throw(ArgumentError("Singular Matrix in PGL₂{$q}: $m"))
         return m
     end
 
     PGL₂{q}(m::AbstractMatrix) where q = PGL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
-isnormal(m::PGL₂) = m[1] == 1 || (m[1] == 0 && m[2] == 1)
+isnormal(m::PGL₂) = isone(m[1]) || (iszero(m[1]) && isone(m[2]))
 
 function normalform!(m::PGL₂)
     isnormal(m) && return m
-    if m[1] ≠ 0
-        a = inv(m[1])
-    elseif m[2] ≠ 0
-        a = inv(m[2])
+    if !iszero(m[1])
+        a = Int(inv(m[1]))
+    elseif !iszero(m[2])
+        a = Int(inv(m[2]))
     else
         error("The first column of $(typeof(m)) matrix must be non-zero! $m")
     end
-    for i in eachindex(m)
-        m[i] = a*m[i]
-    end
+    m = mul!(a, m)
     return m
 end
 
@@ -152,11 +170,10 @@ mutable struct PSL₂{q} <: GL₂{q}
 
     function PSL₂{q}(a,c,b,d) where q
         @assert q isa Integer
-        q > 1 || error("$q (the modulus) must be > 1")
+        q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        @assert det(m) == 1 "m = $m, det(m) = $(det(m))"
-        @assert m[1] <= div(q-1,2) "m = $m is not in normal form!"
+        # det(m) == 1 || throw(ArgumentError("Matrix of determinant ≠ 1 in PGL₂{$q}: $m"))
         return m
     end
 
@@ -164,10 +181,10 @@ mutable struct PSL₂{q} <: GL₂{q}
 end
 
 function isnormal(m::PSL₂{q}) where q
-    det(m) == 1 || return false
+    isone(det(m)) || return false
     if 0 < m[1] <= div(q-1,2)
         return true
-    elseif m[1] == 0 && 0 < m[2] <= div(q-1,2)
+    elseif iszero(m[1]) && 0 < m[2] <= div(q-1,2)
         return true
     else
         return false
@@ -176,21 +193,22 @@ end
 
 function normalform!(m::PSL₂{q}) where q
     isnormal(m) && return m
-    old_m = deepcopy(m)
     p = det(m)
+    if isone(p)
+        xinv = 1
+    else
+        x = sqrt(p)
+        xinv = Int(inv(x))
+    end
 
-    x = sqrt(p)
-    xinv = inv(x)
-
-    elt = (m[1] ≠ 0 ? m[1] : m[2])
+    elt = ifelse(iszero(m[1]), m[2], m[1])
 
     if xinv*elt > div(q-1, 2)
-        xinv *= -1
+        xinv = q - xinv
     end
 
-    for i in eachindex(m)
-        m[i] = xinv*m[i]
-    end
+    m = mul!(xinv, m)
+
     return m
 end
 
