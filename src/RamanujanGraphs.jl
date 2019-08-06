@@ -5,7 +5,7 @@ using LinearAlgebra
 using Combinatorics
 using LightGraphs
 
-export PGL₂, PSL₂, lps_generators, cayley_graph
+export PGL₂, PSL₂, lps_generators, cayley_graph, LPS
 
 include("gl2.jl")
 include("lps_generators.jl")
@@ -46,23 +46,48 @@ function reduced_generating_set(S::AbstractVector)
     return collect(rS)
 end
 
-function cayley_graph(S::AbstractVector{T}; radius::Integer=3) where T
+function diameter_ub(p::Integer, q::Integer)
+    n = order(GLtype(p,q))
+    return floor(Int, 2log(p, n) + 2log(p,2) + 1)
+end
+
+function cayley_graph(S::AbstractVector{T}; radius::Integer=10) where T
     @assert all((!isone).(S))
-    # @assert all(inv(s) in S for s in S)
+    S = reduced_generating_set(S)
 
-    vertices, sizes = generate_balls(unique([S; inv.(S)]), radius=radius)
-    @info "Generated balls of radii" sizes
+    verts, sizes = generate_balls(unique([S; inv.(S)]), radius=radius)
+    @show sizes
 
-    cayley = SimpleGraph(length(vertices))
-    vlabels = Dict(g=>idx for (idx, g) in enumerate(vertices))
+    cayley = SimpleGraph(length(verts))
+    vlabels = Dict(g=>idx for (idx, g) in enumerate(verts))
 
     elabels = Dict{Tuple{Int, Int}, T}()
 
-    for (idx,g) in enumerate(vertices)
+    for g in verts
+        for s in S # S is reduced so that the graph is simple
+            src = vlabels[g]
+            dst = vlabels[g*s] # assuming it exists
+            add_edge!(cayley, src, dst)
+            elabels[(src, dst)] = s
+        end
+    end
+
+    # @assert all(isequal(2length(S)), degree(cayley))
+    verts_missing_edges = findall(!isequal(2length(S)), degree(cayley))
+    # @show verts_missing_edges
+    for v in verts_missing_edges
+        g = verts[v]
         for s in S
             src = vlabels[g]
             dst = vlabels[g*s] # assuming it exists
             add_edge!(cayley, src, dst)
+            elabels[(src, dst)] = s
+        end
+    end
+
+    return cayley, verts, vlabels, elabels
+end
+
         end
     end
 
