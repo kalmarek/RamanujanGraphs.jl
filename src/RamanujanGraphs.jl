@@ -11,12 +11,25 @@ include("gl2.jl")
 include("lps_generators.jl")
 
 function generate_balls(S::AbstractVector{T}, Id::T=one(T);
-        radius=2, op=*) where T
+        radius=2) where T
     sizes = Int[]
     B = [Id]
+    B_Set = Set([Id])
+
     for i in 1:radius
-        BB = [op(i,j) for (i,j) in Base.product(B,S)]
-        B = unique([B; vec(BB)])
+        new_elts = T[]
+        for (g,h) in Base.product(B,S)
+            elt = g*h
+            g*h in B_Set && continue
+            push!(new_elts, elt)
+            push!(B_Set, elt)
+        end
+
+        if length(new_elts) == 0
+            @info "Given radius = $radius, but the group already saturated at" radius=i-1 size=sizes[end]
+            break
+        end
+        B = append!(B, new_elts)
         push!(sizes, length(B))
     end
     return B, sizes
