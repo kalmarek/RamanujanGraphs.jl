@@ -51,8 +51,23 @@ function diameter_ub(p::Integer, q::Integer)
     return floor(Int, 2log(p, n) + 2log(p,2) + 1)
 end
 
+function LPS(p::Integer, q::Integer, radius::Integer)
+    S = lps_generators(p,q)
+    G, verts, vlabels, elabels = cayley_graph(S, radius=radius)
+    # @assert order(eltype(verts)) == length(verts)
+    # @assert all(isequal(p+1), degree(G))
+    return G, verts, labels, elabels
+end
 
-function cayley_graph(S::AbstractVector{T}; radius::Integer=10) where T
+function LPS(p::Integer, q::Integer)
+    S = lps_generators(p,q)
+    G, verts, vlabels, elabels = cayley_graph(S)
+    @assert order(eltype(S)) == length(verts)
+    @assert all(isequal(p+1), degree(G))
+    return G, verts, vlabels, elabels
+end
+
+function cayley_graph(S::AbstractVector{T}, radius::Integer=10) where T
     @assert all((!isone).(S))
     S = reduced_generating_set(S)
 
@@ -73,18 +88,8 @@ function cayley_graph(S::AbstractVector{T}; radius::Integer=10) where T
         end
     end
 
-    # @assert all(isequal(2length(S)), degree(cayley))
-    verts_missing_edges = findall(!isequal(2length(S)), degree(cayley))
-    # @show verts_missing_edges
-    for v in verts_missing_edges
-        g = verts[v]
-        for s in S
-            src = vlabels[g]
-            dst = vlabels[g*s] # assuming it exists
-            add_edge!(cayley, src, dst)
-            elabels[(src, dst)] = s
-        end
-    end
+    all(isequal(2length(S)), degree(cayley)) || @warn(
+        "The degree is not constant = $(2length(S)). A truncated part of the graph is returned.")
 
     return cayley, verts, vlabels, elabels
 end

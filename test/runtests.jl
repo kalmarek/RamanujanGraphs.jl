@@ -72,7 +72,7 @@ end
         for q in [13, 17]
             if p ≠ q
                 S = lps_generators(p, q);
-                E, sizes = RamanujanGraphs.generate_balls(S, radius= 2p)
+                E, sizes = RamanujanGraphs.generate_balls(S, radius=2p)
                 @test sizes[end] == RamanujanGraphs.order(eltype(S))
                 @test all(isequal(p+1), (length(unique(g*s for s in S)) for g in E))
             end
@@ -85,13 +85,13 @@ end
     let (p, q) = (13, 5)
         S = lps_generators(p, q)
 
-        c, vs, vls, els = cayley_graph(S, radius=6)
+        c, vs, vls, els = cayley_graph(S, 6)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
         @test all(isequal(p+1), LightGraphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
 
-        c, vs, vls, els = cayley_graph(RamanujanGraphs.order(eltype(S)), S)
+        c, vs, vls, els = cayley_graph(S)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
         @test all(isequal(p+1), LightGraphs.degree(c))
         @test all(v in keys(vls) for v in vs)
@@ -101,16 +101,20 @@ end
     let (p, q) = (37, 29)
         S = lps_generators(p, q)
 
-        c, vs, vls, els = cayley_graph(S, radius=6)
+        c, vs, vls, els = cayley_graph(S, 6)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
         @test all(isequal(p+1), LightGraphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
 
-        c, vs, vls, els = cayley_graph(RamanujanGraphs.order(eltype(S)), S)
+        c, vs, vls, els = cayley_graph(S)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
         @test all(isequal(p+1), LightGraphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
     end
+
+    c, vs, vls, els = LPS(13, 5)
+    @test length(vs) == RamanujanGraphs.order(eltype(vs))
+    @test nv(c) == length(vs)
 end
