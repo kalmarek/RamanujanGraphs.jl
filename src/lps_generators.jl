@@ -56,6 +56,15 @@ end
 generator(a₀,a₁,a₂,a₃,i) = [a₀ + i*a₁  a₂ + i*a₃;
 			     			-a₂ + i*a₃ a₀ - i*a₁]
 
+function GLtype(p::Integer, q::Integer)
+	legendre = legendresymbol(p,q)
+    if legendre == -1
+        return PGL₂{q}
+    else # if legendre == 1
+        return PSL₂{q}
+    end
+end
+
 function lps_generators(p::Integer, q::Integer)
 	@assert p > 2
 	@assert q > 2
@@ -69,12 +78,8 @@ function lps_generators(p::Integer, q::Integer)
 
 	mats = [generator(a₀,a₁,a₂,a₃,i) for (a₀,a₁,a₂,a₃) in quadruples(p)]
 
-    legendre = legendresymbol(p,q)
-    if legendre == -1
-        S = PGL₂{q}.(mats)
-    elseif legendre == 1
-        S = PSL₂{q}.(mats)
-    end
+	GLt = GLtype(p,q)
+	S = GLt.(mats)
 
 	S = unique([S; inv.(S)])
 	@assert all(inv(s) in S for s in S)
