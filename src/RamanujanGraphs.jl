@@ -7,6 +7,7 @@ using LightGraphs
 
 export PGL₂, PSL₂, lps_generators, cayley_graph, LPS
 
+include("intmod.jl")
 include("gl2.jl")
 include("lps_generators.jl")
 
