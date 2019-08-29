@@ -15,7 +15,7 @@ function Base.getindex(m::GL₂, i::Integer)
     i == 4 && return m.d
 end
 
-function Base.setindex!(m::GL₂{q}, v, i::Integer) where q
+function Base.setindex!(m::GL₂, v, i::Integer)
     if i == 1
         m.a = v
     elseif i == 2
@@ -28,7 +28,7 @@ function Base.setindex!(m::GL₂{q}, v, i::Integer) where q
     return v
 end
 
-ints(m::GL₂) = Int(m[1]), Int(m[2]), Int(m[3]), Int(m[4])
+ints(m::GL₂) = int(m[1]), int(m[2]), int(m[3]), int(m[4])
 
 function Base.:(==)(m::T, n::T) where T <: GL₂
     m = normalform!(m)
@@ -39,25 +39,21 @@ end
 function Base.hash(m::T, h::UInt) where {q, T<:GL₂{q}}
     m = normalform!(m)
     a,c,b,d = ints(m)
-    val = d + q*(b + q*(c + q^3*a)) # q-adic expression of m
+    val = d + q*(b + q*(c + q*a)) # q-adic expression of m
     return hash(T, hash(val, h))
 end
 
 function Base.:(*)(m::T, n::T) where T <: GL₂
     a,c,b,d = ints(m)
     A,C,B,D = ints(n)
-    new_a = a*A + b*C
-    new_b = a*B + b*D
-    new_c = c*A + d*C
-    new_d = c*B + d*D
-    return T(new_a, new_c, new_b, new_d)
+    return T(a*A + b*C, c*A + d*C, a*B + b*D, c*B + d*D)
 end
 
 function mul!(x::Number, m::T) where T<:GL₂
-    m[1] = x*Int(m[1])
-    m[2] = x*Int(m[2])
-    m[3] = x*Int(m[3])
-    m[4] = x*Int(m[4])
+    m[1] = x*int(m[1])
+    m[2] = x*int(m[2])
+    m[3] = x*int(m[3])
+    m[4] = x*int(m[4])
     return m
 end
 
@@ -70,7 +66,6 @@ function Base.inv(m::T) where {q, T <: GL₂{q}}
 
     return T(p¯¹*d, -p¯¹*c+q, -p¯¹*b+q, p¯¹*a)
 end
-
 
 
 ############################################
@@ -90,7 +85,7 @@ mutable struct PGL₂{q} <: GL₂{q}
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        det(m) ≠ 0 || throw(ArgumentError("Singular Matrix in PGL₂{$q}: $m"))
+        @assert det(m) ≠ 0 "Singular Matrix in PGL₂{$q}: $m"
         return m
     end
 
@@ -106,17 +101,19 @@ function normalform!(m::PGL₂)
     else
         a = inv(m[2])
     end
-    m = mul!(Int(a), m)
+    m = mul!(int(a), m)
     return m
 end
 
 order(::Type{PGL₂{q}}) where q = q^3 - q
+
 
 ############################################
 #
 # PSL₂{q}
 #
 ############################################
+
 mutable struct PSL₂{q} <: GL₂{q}
     a::IntMod{q}
     c::IntMod{q}
@@ -128,7 +125,7 @@ mutable struct PSL₂{q} <: GL₂{q}
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        # det(m) == 1 || throw(ArgumentError("Matrix of determinant ≠ 1 in PGL₂{$q}: $m"))
+        @assert det(m) == 1 "Matrix of determinant ≠ 1 in PGL₂{$q}: $m"
         return m
     end
 
@@ -153,7 +150,7 @@ function normalform!(m::PSL₂{q}) where q
         xinv = 1
     else
         x = sqrt(p)
-        xinv = Int(inv(x))
+        xinv = int(inv(x))
     end
 
     elt = ifelse(iszero(m[1]), m[2], m[1])
