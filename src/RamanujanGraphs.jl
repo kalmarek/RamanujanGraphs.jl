@@ -12,10 +12,7 @@ include("intmod.jl")
 include("gl2.jl")
 include("lps_generators.jl")
 
-function diameter_ub(p::Integer, q::Integer)
-    n = order(GLtype(p,q))
-    return floor(Int, 2log(p, n) + 2log(p,2) + 1)
-end
+cayley_graph(S::AbstractVector{T}) where T<:GL₂ = cayley_graph(order(T), S)
 
 function LPS(p::Integer, q::Integer, radius::Integer)
     S = lps_generators(p,q)
@@ -33,6 +30,10 @@ function LPS(p::Integer, q::Integer)
     return G, verts, vlabels, elabels
 end
 
+# from Lubotzky-Phillips-Sarnak
+function diameter_ub(p::Integer, q::Integer)
+    n = order(GLtype(p,q))
+    return floor(Int, 2log(p, n) + 2log(p,2) + 1)
 end
 
 end # module

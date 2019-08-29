@@ -15,7 +15,7 @@ function generate_balls(S::AbstractVector{T}, Id::T=one(T);
         end
 
         if length(new_elts) == 0
-            @info "Given radius = $radius, but the group already saturated at" radius=i-1 size=sizes[end]
+            @info "Given radius = $radius, but $T already saturated at" radius=i-1 size=sizes[end]
             break
         end
         B = append!(B, new_elts)
@@ -37,10 +37,10 @@ end
 
 function cayley_graph(S::AbstractVector{T}, radius::Integer=10) where T
     @assert all((!isone).(S))
-    S = reduced_generating_set(S)
+    rS = reduced_generating_set(S)
+    S = unique([rS; inv.(rS)])
 
-    verts, sizes = generate_balls(unique([S; inv.(S)]), radius=radius)
-    @show sizes
+    verts, sizes = generate_balls(S, radius=radius)
 
     cayley = SimpleGraph(length(verts))
     vlabels = Dict(g=>idx for (idx, g) in enumerate(verts))
@@ -48,7 +48,7 @@ function cayley_graph(S::AbstractVector{T}, radius::Integer=10) where T
     elabels = Dict{Tuple{Int, Int}, T}()
 
     for g in verts
-        for s in S # S is reduced so that the graph is simple
+        for s in rS # rS is reduced so that the graph is simple
             src = vlabels[g]
             dst = vlabels[g*s] # assuming it exists
             add_edge!(cayley, src, dst)
@@ -56,8 +56,8 @@ function cayley_graph(S::AbstractVector{T}, radius::Integer=10) where T
         end
     end
 
-    all(isequal(2length(S)), degree(cayley)) || @warn(
-        "The degree is not constant = $(2length(S)). A truncated part of the graph is returned.")
+    all(isequal(length(S)), degree(cayley)) || @warn(
+        "The degree is not constant = $(length(S)). A truncated part of the graph is returned.")
 
     return cayley, verts, vlabels, elabels
 end

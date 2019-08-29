@@ -78,8 +78,8 @@ function lps_generators(p::Integer, q::Integer)
 
 	mats = [generator(a₀,a₁,a₂,a₃,i) for (a₀,a₁,a₂,a₃) in quadruples(p)]
 
-	GLt = GLtype(p,q)
-	S = GLt.(mats)
+	GL_t = GLtype(p,q)
+	S = GL_t.(mats)
 
 	S = unique([S; inv.(S)])
 	@assert all(inv(s) in S for s in S)
