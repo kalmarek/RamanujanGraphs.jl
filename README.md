@@ -22,32 +22,28 @@ where
 Timings:
 
 ```julia
+julia> using RamanujanGraphs, RamanujanGraphs.LightGraphs
 
-julia> using RamanujanGraphs
-
-julia> using RamanujanGraphs.LightGraphs
-
-julia> @time G, verts, vlabels, elabels = LPS(13, 61); @info "Cayley Graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
-  4.737794 seconds (7.52 M allocations: 599.736 MiB, 10.69% gc time)
+julia> let (p,q) = (13,61)
+           LPS(p, q);
+           @time G, verts, vlabels, elabels = LPS(p, q);
+           @assert nv(G) == RamanujanGraphs.order(eltype(verts))
+           @info "Cayley graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
+       end
+ 1.701829 seconds (2.05 M allocations: 272.833 MiB)
 ┌ Info: Cayley Graph of PSL₂{61}:
 │   degree = 14
 └   size = 113460
 
-julia> @time G, verts, vlabels, elabels = LPS(13, 61); @info "Cayley Graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
-  2.326424 seconds (2.05 M allocations: 320.664 MiB, 20.25% gc time)
-┌ Info: Cayley Graph of PSL₂{61}:
-│   degree = 14
-└   size = 113460
-
-julia> @time G, verts, vlabels, elabels = LPS(13, 73); @info "Cayley Graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
- 10.958349 seconds (9.68 M allocations: 963.480 MiB, 18.57% gc time)
+julia> let (p,q) = (13,73)
+           LPS(p, q);
+           @time G, verts, vlabels, elabels = LPS(p, q);
+           @assert nv(G) == RamanujanGraphs.order(eltype(verts))
+           @info "Cayley graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
+       end
+ 6.400727 seconds (6.68 M allocations: 655.549 MiB)
 ┌ Info: Cayley Graph of PGL₂{73}:
 │   degree = 14
 └   size = 388944
 
-julia> @time G, verts, vlabels, elabels = LPS(13, 73); @info "Cayley Graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
-  9.801834 seconds (6.68 M allocations: 811.452 MiB, 21.35% gc time)
-┌ Info: Cayley Graph of PGL₂{73}:
-│   degree = 14
-└   size = 388944
 ```

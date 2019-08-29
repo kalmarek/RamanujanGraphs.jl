@@ -6,7 +6,7 @@ using LightGraphs
 
 @testset "GL₂" begin
     @testset "PGL₂" begin
-        @test_throws ArgumentError PGL₂{5}(-4, 2 , 6, 2)
+        @test_throws AssertionError PGL₂{5}(-4, 2 , 6, 2)
         m = PGL₂{5}(-4, 2 , 6, 4)
         @test m == PGL₂{5}(1, 2, 1, 4)
         @test det(m) == 2
@@ -30,7 +30,7 @@ using LightGraphs
     end
 
     @testset "PSL₂" begin
-        @test_throws ArgumentError PSL₂{5}(-4, 2 , 6, 4)
+        @test_throws DomainError PSL₂{5}(-4, 2 , 6, 4)
         m = PSL₂{5}(-4, 2 , 6, 3)
         @test det(m) == 1
         @test m^3 == PSL₂{5}([3 0; 0 3])
@@ -72,7 +72,8 @@ end
         for q in [13, 17]
             if p ≠ q
                 S = lps_generators(p, q);
-                E, sizes = RamanujanGraphs.generate_balls(S, radius=2p)
+                E, sizes = RamanujanGraphs.generate_balls(S,
+                    radius=RamanujanGraphs.diameter_ub(p,q))
                 @test sizes[end] == RamanujanGraphs.order(eltype(S))
                 @test all(isequal(p+1), (length(unique(g*s for s in S)) for g in E))
             end
