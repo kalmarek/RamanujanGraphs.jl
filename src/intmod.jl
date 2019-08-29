@@ -29,6 +29,25 @@ Base.isone(n::IntMod) = int(n) == 1
 
 Base.promote_rule(::Type{IntMod{q}}, ::Type{I}) where {q, I<:Integer} = IntMod{q}
 
+# taken from ValidatedNumerics, under under the MIT "Expat" License:
+# https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
+function subscriptify(n::Integer)
+    subscript_0 = Int(0x2080) # Char(0x2080) -> subscript 0
+    @assert 0 <= n <= 9
+    return Char(subscript_0 + n)
+end
+
+Base.show(io::IO, n::IntMod{q}) where q =
+    print(io, "$(int(n))"*join(subscriptify.(reverse(digits(q))), ""))
+
+import Base: <, <=
+for ord in [:<, :(<=)]
+    @eval begin
+        $ord(n::IntMod{q}, m::IntMod{q}) where q = $ord(int(n),int(m))
+        $ord(n::IntMod, y::Number) = $ord(int(n), y)
+        $ord(y::Number, n::IntMod) = $ord(y, int(n))
+    end
+end
 
 Combinatorics.legendresymbol(n::IntMod{q}) where q = legendresymbol(int(n), q)
 
