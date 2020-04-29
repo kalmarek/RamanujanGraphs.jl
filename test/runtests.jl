@@ -4,6 +4,16 @@ using LinearAlgebra
 using RamanujanGraphs
 using LightGraphs
 
+@testset "IntMod" begin
+    q = 67
+    for i in 1:q
+        if isone(RamanujanGraphs.legendresymbol(i, q))
+            a = RamanujanGraphs.IntMod{q}(i)
+            @test sqrt(a)^2 == a
+        end
+    end
+end
+
 @testset "GL₂" begin
     @testset "PGL₂" begin
         @test_throws AssertionError PGL₂{5}(-4, 2 , 6, 2)

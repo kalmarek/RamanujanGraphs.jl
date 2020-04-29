@@ -49,14 +49,21 @@ for ord in [:<, :(<=)]
     end
 end
 
-Combinatorics.legendresymbol(n::IntMod{q}) where q = legendresymbol(int(n), q)
+function legendresymbol(n, q)
+    iszero(mod(n, q)) && return zero(n)
+    isone(powermod(n, (q-1)÷2, q)) && return one(n)
+    return -one(n)
+end
 
-function Base.sqrt(n::IntMod{q}) where q
-    l = legendresymbol(n)
-    l == 0 && return zero(IntMod{q})
-    l == -1 && throw(DomainError(n, "$(int(n)) is not a square modulo $q"))
-    for i in 1:q
-        i^2 % q == int(n) && return IntMod{q}(i)
+Base.sqrt(n::IntMod{q}) where q = IntMod{q}(sqrtmod(int(n), q))
+
+function sqrtmod(n::Integer, q::Integer)
+    l = legendresymbol(n, q)
+    l == 0 && return zero(n)
+    l == -1 && throw(DomainError(n, "$n is not a square modulo $q"))
+    for i in 1:q # bruteforce loop
+        y = powermod(i, 2, q)
+        y == n && return oftype(n, i)
     end
     return zero(n) # never hit, to keep compiler happy
 end

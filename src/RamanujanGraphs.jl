@@ -2,7 +2,6 @@ module RamanujanGraphs
 
 using Primes
 using LinearAlgebra
-using Combinatorics
 using LightGraphs
 
 export PGL₂, PSL₂, lps_generators, cayley_graph, LPS

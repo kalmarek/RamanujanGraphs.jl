@@ -58,10 +58,13 @@ generator(a₀,a₁,a₂,a₃,i) = [a₀ + i*a₁  a₂ + i*a₃;
 
 function GLtype(p::Integer, q::Integer)
 	legendre = legendresymbol(p,q)
+
     if legendre == -1
         return PGL₂{q}
-    else # if legendre == 1
+    elseif legendre == 1
         return PSL₂{q}
+	else
+		throw("legendresymbol(p,q) = $legendre")
     end
 end
 
