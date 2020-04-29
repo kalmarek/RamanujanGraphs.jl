@@ -3,8 +3,8 @@ struct IntMod{q} <: Number
 
     function IntMod{q}(n) where q
         @assert q > 1
-        k = n % q
-        k = ifelse(k >=0, k, k+q)
+        k = (-q<n<q ? n : n%q)
+        k = ifelse(k >= 0, k, k + q)
         return new{q}(k)
     end
 end
@@ -21,6 +21,11 @@ Base.:*(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) * int(m))
 
 Base.:-(n::IntMod{q}) where q = IntMod{q}(q - int(n))
 Base.inv(n::IntMod{q}) where q = IntMod{q}(invmod(int(n), q))
+
+function Base.:^(n::IntMod{q}, i::Integer) where q
+   i < 0 && return inv(n)^-i
+   return IntMod{q}(powermod(int(n), i, q))
+end
 
 Base.zero(::Type{IntMod{q}}) where q = IntMod{q}(0)
 Base.one(::Type{IntMod{q}}) where q = IntMod{q}(1)

@@ -5,6 +5,7 @@ Base.length(::GL₂) = 4
 
 Base.one(::Type{T}) where T <: GL₂ = T(1, 0, 0, 1)
 Base.one(::T) where T <: GL₂ = one(T)
+Base.similar(::T) where T <: GL₂ = one(T)
 
 Base.IndexStyle(::GL₂) = IndexLinear()
 
