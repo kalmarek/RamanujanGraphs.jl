@@ -1,13 +1,13 @@
 Following paper
 > _Ramanujan graphs_ by Lubotzky, A., Phillips, R. & Sarnak, P. Combinatorica (1988) 8: 261. https://doi.org/10.1007/BF02126799
 
-this package implements function `LPS(p::Integer, q::Integer)` for different primes `p`,`q` congruent to `1 modulo 4` returning the appropriate Cayley graph.
+this package implements function `lps(p::Integer, q::Integer)` for different primes `p`,`q` congruent to `1 modulo 4` returning the appropriate Cayley graph.
 
 A basic syntax is as follows:
 
 ```julia
 using RamanujanGraphs
-G, verts, vlabels, elabels = LPS(p, q)
+G, verts, vlabels, elabels = lps(p, q)
 ```
 
 where
@@ -25,8 +25,8 @@ Timings:
 julia> using RamanujanGraphs, RamanujanGraphs.LightGraphs
 
 julia> let (p,q) = (13,61)
-           LPS(p, q);
-           @time G, verts, vlabels, elabels = LPS(p, q);
+           lps(p, q);
+           @time G, verts, vlabels, elabels = lps(p, q);
            @assert nv(G) == RamanujanGraphs.order(eltype(verts))
            @info "Cayley graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
        end
@@ -36,8 +36,8 @@ julia> let (p,q) = (13,61)
 └   size = 113460
 
 julia> let (p,q) = (13,73)
-           LPS(p, q);
-           @time G, verts, vlabels, elabels = LPS(p, q);
+           lps(p, q);
+           @time G, verts, vlabels, elabels = lps(p, q);
            @assert nv(G) == RamanujanGraphs.order(eltype(verts))
            @info "Cayley graph of $(eltype(verts)):" degree=length(neighbors(G,1)) size=nv(G)
        end

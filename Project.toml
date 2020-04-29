@@ -1,7 +1,7 @@
 name = "RamanujanGraphs"
 uuid = "e7bd6bc6-b6b8-11e9-1ec2-2f89442c0d6c"
 authors = ["Marek Kaluba <kalmar@amu.edu.pl>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [deps]
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"

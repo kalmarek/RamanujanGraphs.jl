@@ -125,7 +125,7 @@ end
         @test all(vls[vs[i]] == i for i in eachindex(vs))
     end
 
-    c, vs, vls, els = LPS(13, 5)
+    c, vs, vls, els = lps(13, 5)
     @test length(vs) == RamanujanGraphs.order(eltype(vs))
     @test nv(c) == length(vs)
 end
