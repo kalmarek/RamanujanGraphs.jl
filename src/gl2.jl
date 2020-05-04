@@ -1,22 +1,22 @@
-abstract type GL₂{q} <: AbstractMatrix{IntMod} end
+abstract type AbstractGL₂{q} <: AbstractMatrix{IntMod} end
 
-Base.size(::GL₂) = (2,2)
-Base.length(::GL₂) = 4
+Base.size(::AbstractGL₂) = (2,2)
+Base.length(::AbstractGL₂) = 4
 
-Base.one(::Type{T}) where T <: GL₂ = T(1, 0, 0, 1)
-Base.one(::T) where T <: GL₂ = one(T)
-Base.similar(::T) where T <: GL₂ = one(T)
+Base.one(::Type{T}) where T <: AbstractGL₂ = T(1, 0, 0, 1)
+Base.one(::T) where T <: AbstractGL₂ = one(T)
+Base.similar(::T) where T <: AbstractGL₂ = one(T)
 
-Base.IndexStyle(::GL₂) = IndexLinear()
+Base.IndexStyle(::AbstractGL₂) = IndexLinear()
 
-function Base.getindex(m::GL₂, i::Integer)
+function Base.getindex(m::AbstractGL₂, i::Integer)
     i == 1 && return m.a
     i == 2 && return m.c # julia assumes column wise storage for IndexLinear
     i == 3 && return m.b
     i == 4 && return m.d
 end
 
-function Base.setindex!(m::GL₂, v, i::Integer)
+function Base.setindex!(m::AbstractGL₂, v, i::Integer)
     if i == 1
         m.a = v
     elseif i == 2
@@ -29,28 +29,28 @@ function Base.setindex!(m::GL₂, v, i::Integer)
     return v
 end
 
-ints(m::GL₂) = int(m[1]), int(m[2]), int(m[3]), int(m[4])
+ints(m::AbstractGL₂) = int(m[1]), int(m[2]), int(m[3]), int(m[4])
 
-function Base.:(==)(m::T, n::T) where T <: GL₂
+function Base.:(==)(m::T, n::T) where T <: AbstractGL₂
     m = normalform!(m)
     n = normalform!(n)
     return ints(m) == ints(n)
 end
 
-function Base.hash(m::T, h::UInt) where {q, T<:GL₂{q}}
+function Base.hash(m::T, h::UInt) where {q, T<:AbstractGL₂{q}}
     m = normalform!(m)
     a,c,b,d = ints(m)
     val = d + q*(b + q*(c + q*a)) # q-adic expression of m
     return hash(T, hash(val, h))
 end
 
-function Base.:(*)(m::T, n::T) where T <: GL₂
+function Base.:(*)(m::T, n::T) where T <: AbstractGL₂
     a,c,b,d = ints(m)
     A,C,B,D = ints(n)
     return T(a*A + b*C, c*A + d*C, a*B + b*D, c*B + d*D)
 end
 
-function mul!(x::Number, m::T) where T<:GL₂
+function mul!(x::Number, m::T) where T<:AbstractGL₂
     m[1] = x*int(m[1])
     m[2] = x*int(m[2])
     m[3] = x*int(m[3])
@@ -58,9 +58,9 @@ function mul!(x::Number, m::T) where T<:GL₂
     return m
 end
 
-LinearAlgebra.det(m::GL₂{q}) where q = ((a,c,b,d) = ints(m); IntMod{q}(a*d-c*b))
+LinearAlgebra.det(m::AbstractGL₂{q}) where q = ((a,c,b,d) = ints(m); IntMod{q}(a*d-c*b))
 
-function Base.inv(m::T) where {q, T <: GL₂{q}}
+function Base.inv(m::T) where {q, T <: AbstractGL₂{q}}
     a,c,b,d = ints(m)
     p = a*d - b*c
     p¯¹ = invmod(p, q)
@@ -70,12 +70,10 @@ end
 
 
 ############################################
-#
-# PGL₂{q}
-#
 ############################################
+# PGL₂{q}
 
-mutable struct PGL₂{q} <: GL₂{q}
+mutable struct PGL₂{q} <: AbstractGL₂{q}
     a::IntMod{q}
     c::IntMod{q}
     b::IntMod{q}
@@ -86,7 +84,7 @@ mutable struct PGL₂{q} <: GL₂{q}
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        @assert det(m) ≠ 0 "Singular Matrix in PGL₂{$q}: $m"
+        @assert !iszero(det(m)) "Singular Matrix in PGL₂{$q}: $m"
         return m
     end
 
@@ -110,12 +108,9 @@ order(::Type{PGL₂{q}}) where q = q^3 - q
 
 
 ############################################
-#
 # PSL₂{q}
-#
-############################################
 
-mutable struct PSL₂{q} <: GL₂{q}
+mutable struct PSL₂{q} <: AbstractGL₂{q}
     a::IntMod{q}
     c::IntMod{q}
     b::IntMod{q}
@@ -126,7 +121,7 @@ mutable struct PSL₂{q} <: GL₂{q}
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
         m = new{q}(a,c,b,d)
         m = normalform!(m)
-        @assert det(m) == 1 "Matrix of determinant ≠ 1 in PGL₂{$q}: $m"
+        @assert isone(det(m)) "Matrix of determinant ≠ 1 in PSL₂{$q}: $m"
         return m
     end
 

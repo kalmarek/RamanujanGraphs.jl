@@ -56,7 +56,7 @@ end
 generator(a₀,a₁,a₂,a₃,i) = [a₀ + i*a₁  a₂ + i*a₃;
 			     			-a₂ + i*a₃ a₀ - i*a₁]
 
-function GLtype(p::Integer, q::Integer)
+function PGLtype(p::Integer, q::Integer)
 	legendre = legendresymbol(p,q)
 
     if legendre == -1
@@ -81,7 +81,7 @@ function lps_generators(p::Integer, q::Integer)
 
 	mats = [generator(a₀,a₁,a₂,a₃,i) for (a₀,a₁,a₂,a₃) in quadruples(p)]
 
-	GL_t = GLtype(p,q)
+	GL_t = PGLtype(p,q)
 	S = GL_t.(mats)
 
 	S = unique([S; inv.(S)])

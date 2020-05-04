@@ -14,7 +14,7 @@ using LightGraphs
     end
 end
 
-@testset "GL₂" begin
+@testset "Projective groups: AbstractGL₂" begin
     @testset "PGL₂" begin
         @test_throws AssertionError PGL₂{5}(-4, 2 , 6, 2)
         m = PGL₂{5}(-4, 2 , 6, 4)

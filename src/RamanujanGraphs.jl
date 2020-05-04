@@ -28,7 +28,7 @@ end
 
 # from Lubotzky-Phillips-Sarnak
 function diameter_ub(p::Integer, q::Integer)
-    n = order(GLtype(p,q))
+    n = order(PGLtype(p,q))
     return floor(Int, 2log(p, n) + 2log(p,2) + 1)
 end
 
