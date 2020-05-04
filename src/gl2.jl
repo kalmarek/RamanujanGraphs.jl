@@ -68,8 +68,60 @@ function Base.inv(m::T) where {q, T <: AbstractGL₂{q}}
     return T(p¯¹*d, -p¯¹*c+q, -p¯¹*b+q, p¯¹*a)
 end
 
+############################################
+# GL₂{q}
+
+mutable struct GL₂{q} <: AbstractGL₂{q}
+    a::IntMod{q}
+    c::IntMod{q}
+    b::IntMod{q}
+    d::IntMod{q}
+
+    function GL₂{q}(a,c,b,d) where q
+        @assert q isa Integer
+        q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
+        m = new{q}(a,c,b,d)
+        @assert !iszero(det(m)) "Singular Matrix in GL₂{$q}: $m"
+        return m
+    end
+
+    GL₂{q}(m::AbstractMatrix) where q = GL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
+end
+
+isnormal(m::GL₂) = true
+
+normalform!(m::GL₂) = m
+
+order(::Type{GL₂{q}}) where q = (q^2 - 1)*(q^2 - q)
+
 
 ############################################
+# SL₂{q}
+
+mutable struct SL₂{q} <: AbstractGL₂{q}
+    a::IntMod{q}
+    c::IntMod{q}
+    b::IntMod{q}
+    d::IntMod{q}
+
+    function SL₂{q}(a,c,b,d) where q
+        @assert q isa Integer
+        q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
+        m = new{q}(a,c,b,d)
+        @assert isone(det(m)) "Matrix of determinant ≠ 1 in SL₂{$q}: $m"
+        return m
+    end
+
+    SL₂{q}(m::AbstractMatrix) where q = SL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
+end
+
+isnormal(m::SL₂) = true
+
+normalform!(m::SL₂) = m
+
+order(::Type{SL₂{q}}) where q = q^3 - q
+
+
 ############################################
 # PGL₂{q}
 
