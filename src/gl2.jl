@@ -68,6 +68,60 @@ function Base.inv(m::T) where {q, T <: AbstractGL₂{q}}
     return T(p¯¹*d, -p¯¹*c+q, -p¯¹*b+q, p¯¹*a)
 end
 
+isupper(m::AbstractGL₂) = iszero(m[2])
+
+"""
+    Bruhat(m::AbstractGL₂)
+Return Bruhat decomposition of `m` consisting of four matrices: `u, w, D, U`,
+where `m == u * w * D * U` and
+* `u` and `U` are upper-triangular, with `1`s on the diagonal,
+* `w` is either identity matrix, or `w = [0 1; -1 0]` corresponds to the Weyl group generator,
+* `D` is diagonal.
+
+
+If `b = Bruhat(m)` one can access those matrices through property query:
+> `b.u, b.w, b.D, b.U`
+
+In mathematical terms these matrices correspond to Bruhat decomposition of GL₂ as
+double cosets of the Borel subgroup of upper-triangular matrices:
+
+    `G = BWB = ∐_w BwB`
+
+where `w` ranges over the Weyl group. In the case of `GL₂` we can write
+
+    `GL₂ = DU ⊔ UwDU`
+
+where `D` is the subgroup of diagonal matrices, `U` of unipotent ones
+(thus `DU = B`) and `w² = -Id₂`.
+"""
+struct Bruhat{T<:AbstractGL₂}
+    matrix::T
+end
+
+istrivial_weylcoset(B::Bruhat) = isupper(B.matrix)
+
+function Base.getproperty(bru::Bruhat{T}, S::Symbol) where T
+    m = getfield(bru, :matrix)
+    a,c,b,d = m[1], m[2], m[3], m[4]
+    if S ∈ (:u, :w, :U, :D)
+        if istrivial_weylcoset(bru)
+            S === :u && return one(bru.matrix)
+            S === :w && return one(bru.matrix)
+            S === :U && return T(1, 0, b*inv(a), 1)
+            S === :D && return T(a, 0, 0, d)
+        else
+            S === :u && return T(1, 0, a*inv(c), 1)
+            S === :w && return T(0, -1, 1, 0)
+            S === :D && return T(-c, 0, 0, -(a*d - b*c)*inv(c))
+            S === :U && return T(1, 0, d*inv(c), 1)
+        end
+    else
+        return getfield(bru, S)
+    end
+end
+
+bruhat(m::AbstractGL₂) = (b = Bruhat(m); (b.u, b.w, b.D, b.U))
+
 ############################################
 # GL₂{q}
 
