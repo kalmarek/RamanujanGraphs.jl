@@ -10,6 +10,7 @@ export GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat
 include("cayley.jl")
 include("intmod.jl")
 include("gl2.jl")
+include("borel.jl")
 
 include("lps_generators.jl")
 
