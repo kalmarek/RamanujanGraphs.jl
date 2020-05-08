@@ -11,6 +11,7 @@ include("cayley.jl")
 include("intmod.jl")
 include("gl2.jl")
 include("borel.jl")
+include("coset_decomposition.jl")
 
 include("lps_generators.jl")
 
