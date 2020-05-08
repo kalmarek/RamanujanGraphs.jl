@@ -6,14 +6,14 @@
         a = SL₂{q}(1, 0, 1, 1)
         b = SL₂{q}(1, 1, 0, 1)
 
-        E, sizes = generate_balls([a,b, inv(a), inv(b)], radius=20);
-        @assert sizes[end] == order(SL₂{q})
+        E, sizes = RamanujanGraphs.generate_balls([a,b, inv(a), inv(b)], radius=20);
+        @test sizes[end] == order(SL₂{q})
         E
     end
 
     @test all(b == prod(bruhat(b)) for b in SL2q)
 
-    coset_reps = let α = generator(first(SL2q)[1])
+    coset_reps = let α = RamanujanGraphs.generator(first(SL2q)[1])
         borel_coset_representative(u::IntMod{q}) = SL₂{q}(0, -1, 1, -u)
         borel_coset_representative(q::Int) = one(SL₂{q})
         reps = [
@@ -27,7 +27,7 @@
 
     @testset "perm_repr" begin
 
-        function perm_repr(x::T, coset_representatives, trivial_coset) where T<:AbstractGL₂
+        function perm_repr(x::T, coset_representatives, trivial_coset) where T<:RamanujanGraphs.AbstractGL₂
 
             perm = zeros(Int, length(coset_representatives))
             inv_coset_representatives = inv.(coset_representatives)

@@ -5,7 +5,8 @@ using LinearAlgebra
 using LightGraphs
 
 export lps_generators, cayley_graph, lps
-export GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat
+export IntMod, GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat
+export CosetDecomposition, right_action, order
 
 include("cayley.jl")
 include("intmod.jl")

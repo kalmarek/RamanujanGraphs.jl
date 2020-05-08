@@ -10,7 +10,7 @@
     @test collect(B) isa Vector{<:SL₂{q}}
     @time collect(B)
     @test length(Set(collect(B))) == length(B)
-    @test all(isupper, B)
+    @test all(RamanujanGraphs.isupper, B)
 
     @test all(b == prod(bruhat(b)) for b in B)
 
