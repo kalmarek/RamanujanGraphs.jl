@@ -18,6 +18,7 @@ Base.hash(n::IntMod{q}, h::UInt) where q = xor(0x04fd9e474909f8bf, hash(q, hash(
 Base.:+(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) + int(m))
 Base.:-(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) - int(m))
 Base.:*(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) * int(m))
+Base.:/(n::IntMod{q}, m::IntMod{q}) where q = n*inv(m)
 
 Base.:-(n::IntMod{q}) where q = IntMod{q}(q - int(n))
 Base.inv(n::IntMod{q}) where q = IntMod{q}(invmod(int(n), q))
@@ -58,6 +59,13 @@ function legendresymbol(n, q)
     iszero(mod(n, q)) && return zero(n)
     isone(powermod(n, (q-1)÷2, q)) && return one(n)
     return -one(n)
+end
+
+function generator(n::IntMod{q}) where q
+    for i in 2:q-1
+        isone(-legendresymbol(i, q)) && return IntMod{q}(i)
+    end
+    return zero(n) # never hit, to keep compiler happy
 end
 
 Base.sqrt(n::IntMod{q}) where q = IntMod{q}(sqrtmod(int(n), q))
