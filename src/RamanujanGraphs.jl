@@ -6,7 +6,7 @@ using LightGraphs
 
 export lps_generators, cayley_graph, lps
 export IntMod, GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat
-export CosetDecomposition, right_action, order
+export PrincipalRepresentation, CosetDecomposition, right_action, order
 
 include("cayley.jl")
 include("intmod.jl")

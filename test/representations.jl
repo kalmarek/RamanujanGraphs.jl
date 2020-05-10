@@ -26,11 +26,12 @@
 
 
     Borel_cd = CosetDecomposition(coset_reps, inv.(coset_reps), Borel(SL₂{q}))
-    ϱ = PrincipalRepresentation(generator(one(IntMod{q}))=>1im, Borel_cd)
+    α = RamanujanGraphs.generator(one(IntMod{q}))
+    ϱ = PrincipalRepresentation(α=>1im, Borel_cd)
 
     @testset "specific basis" begin
 
-        @test isone(det(ϱ(SL2q[2], Unipotent)))
+        @test isone(det(ϱ(SL2q[2], RamanujanGraphs.Unipotent)))
 
         @test isone(ϱ(SL2q[1]))
         @test !isone(ϱ(SL2q[2]))
@@ -38,10 +39,10 @@
 
         @test isone(det(ϱ(SL₂{q}(3^2, 0, 0, invmod(3^2, q)), Diagonal)))
 
-        @test isone(det(ϱ(SL₂{q}(0, -1, 1, 0), Weyl)))
+        @test isone(det(ϱ(SL₂{q}(0, -1, 1, 0), RamanujanGraphs.Weyl)))
 
         @test isone(ϱ(SL2q[1]))
-        @test ϱ(SL2q[2]) == ϱ(SL2q[2], Unipotent)
+        @test ϱ(SL2q[2]) == ϱ(SL2q[2], RamanujanGraphs.Unipotent)
         @test isone(det(ϱ(SL2q[3])))
         @test isone(ϱ(SL2q[2])*ϱ(inv(SL2q[2])))
         @test isone(ϱ(SL2q[3])*ϱ(inv(SL2q[3])))
@@ -54,11 +55,12 @@
     end
 
     for val in [1, im, -1, -im]
-        ϱ = PrincipalRepresentation(generator(one(IntMod{q}))=>val, CosetDecomposition(SL2q, Borel(SL₂{q})))
+        ϱ = PrincipalRepresentation(α=>val,
+            CosetDecomposition(SL2q, Borel(SL₂{q})))
 
         @testset "arbirtrary basis: $val" begin
 
-            @test isone(det(ϱ(SL2q[2], Unipotent)))
+            @test isone(det(ϱ(SL2q[2], RamanujanGraphs.Unipotent)))
 
             @test isone(ϱ(SL2q[1]))
             @test !isone(ϱ(SL2q[2]))
@@ -66,21 +68,19 @@
 
             @test isone(det(ϱ(SL₂{q}(3^2, 0, 0, invmod(3^2, q)), Diagonal)))
 
-            @test isone(det(ϱ(SL₂{q}(0, -1, 1, 0), Weyl)))
+            @test isone(det(ϱ(SL₂{q}(0, -1, 1, 0), RamanujanGraphs.Weyl)))
 
             @test isone(ϱ(SL2q[1]))
-            @test ϱ(SL2q[2]) == ϱ(SL2q[2], Unipotent)
+            @test ϱ(SL2q[2]) == ϱ(SL2q[2], RamanujanGraphs.Unipotent)
             @test isone(det(ϱ(SL2q[3])))
             @test isone(ϱ(SL2q[2])*ϱ(inv(SL2q[2])))
             @test isone(ϱ(SL2q[3])*ϱ(inv(SL2q[3])))
 
             @test ϱ(SL2q[2]*SL2q[3]) == ϱ(SL2q[2])*ϱ(SL2q[3])
 
-            for g in SL2q[rand(1:length(SL2q), 50)]
-                print(".")
-                @test all(ϱ(g*h) == ϱ(g)*ϱ(h) for h in SL2q[rand(1:length(SL2q), 50)])
+            for g in SL2q
+                @test all(ϱ(g*h) == ϱ(g)*ϱ(h) for h in SL2q)
             end
-            println("")
         end
     end
 end
