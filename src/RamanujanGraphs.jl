@@ -9,7 +9,7 @@ export GF, GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat
 export PrincipalRepresentation, CosetDecomposition, right_action, order
 
 include("cayley.jl")
-include("intmod.jl")
+include("gf.jl")
 include("gl2.jl")
 include("borel.jl")
 include("coset_decomposition.jl")
