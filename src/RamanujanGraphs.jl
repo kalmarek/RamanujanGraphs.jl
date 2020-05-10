@@ -13,6 +13,7 @@ include("intmod.jl")
 include("gl2.jl")
 include("borel.jl")
 include("coset_decomposition.jl")
+include("representations.jl")
 
 include("lps_generators.jl")
 
