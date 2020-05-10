@@ -14,9 +14,11 @@ function Base.getindex(m::AbstractGL₂, i::Integer)
     i == 2 && return m.c # julia assumes column wise storage for IndexLinear
     i == 3 && return m.b
     i == 4 && return m.d
+    throw(BoundsError(m, i))
 end
 
 function Base.setindex!(m::AbstractGL₂, v, i::Integer)
+    @boundscheck 1 ≤ i ≤ 4 || throw(BoundsError(m, i))
     if i == 1
         m.a = v
     elseif i == 2
@@ -98,15 +100,13 @@ struct Bruhat{T<:AbstractGL₂}
     matrix::T
 end
 
-istrivial_weylcoset(B::Bruhat) = isupper(B.matrix)
-
 function Base.getproperty(bru::Bruhat{T}, S::Symbol) where T
     m = getfield(bru, :matrix)
     a,c,b,d = m[1], m[2], m[3], m[4]
     if S ∈ (:u, :w, :U, :D)
-        if istrivial_weylcoset(bru)
-            S === :u && return one(bru.matrix)
-            S === :w && return one(bru.matrix)
+        if isupper(getfield(bru, :matrix)) # istrivial_weylcoset(bru)
+            S === :u && return one(T)
+            S === :w && return one(T)
             S === :U && return T(1, 0, b*inv(a), 1)
             S === :D && return T(a, 0, 0, d)
         else
