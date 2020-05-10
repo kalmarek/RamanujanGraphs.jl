@@ -10,19 +10,19 @@ struct PrincipalRepresentation{G,T,GL} <: AbstractRepresentation{T}
     borel_cd::CosetDecomposition{GL,Borel{GL}}
 end
 
-function Base.show(io::IO, ϱ::PrincipalRepresentation{IntMod{q}, T, GL}) where {q, T, GL}
+function Base.show(io::IO, ϱ::PrincipalRepresentation{GF{q}, T, GL}) where {q, T, GL}
     println(io, "Principal series representation of $GL")
     print(io, " · associated character of 𝔽_q: ", ϱ.character_value)
 end
 
-function (ϱ::PrincipalRepresentation{IntMod{q},T,SL₂{q}})(m::SL₂{q}) where {q,T}
+function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(m::SL₂{q}) where {q,T}
     # for now only for SL₂
     u, w, D, U = bruhat(m)
     isone(w) && return ϱ(D, Diagonal) * ϱ(U, Unipotent)
     return ϱ(u, Unipotent) * ϱ(w, Weyl) * ϱ(D, Diagonal) * ϱ(U, Unipotent)
 end
 
-function (ϱ::PrincipalRepresentation{IntMod{q},T,SL₂{q}})(
+function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(
     U::SL₂{q},
     ::Type{Unipotent},
 ) where {T,q}
@@ -37,7 +37,7 @@ function (ϱ::PrincipalRepresentation{IntMod{q},T,SL₂{q}})(
     return ϱU
 end
 
-function (ϱ::PrincipalRepresentation{IntMod{q},T,SL₂{q}})(
+function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(
     D::SL₂{q},
     ::Type{Diagonal},
 ) where {T,q}
@@ -61,7 +61,7 @@ function (ϱ::PrincipalRepresentation{IntMod{q},T,SL₂{q}})(
     return ϱD
 end
 
-function (ϱ::PrincipalRepresentation{IntMod{q},T})(
+function (ϱ::PrincipalRepresentation{GF{q},T})(
     w::SL₂{q},
     ::Type{Weyl},
 ) where {T,q}

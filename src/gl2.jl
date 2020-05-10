@@ -1,4 +1,4 @@
-abstract type AbstractGL₂{q} <: AbstractMatrix{IntMod} end
+abstract type AbstractGL₂{q} <: AbstractMatrix{GF} end
 
 Base.size(::AbstractGL₂) = (2,2)
 Base.length(::AbstractGL₂) = 4
@@ -60,7 +60,7 @@ function mul!(x::Number, m::T) where T<:AbstractGL₂
     return m
 end
 
-LinearAlgebra.det(m::AbstractGL₂{q}) where q = ((a,c,b,d) = ints(m); IntMod{q}(a*d-c*b))
+LinearAlgebra.det(m::AbstractGL₂{q}) where q = ((a,c,b,d) = ints(m); GF{q}(a*d-c*b))
 
 function Base.inv(m::T) where {q, T <: AbstractGL₂{q}}
     a,c,b,d = ints(m)
@@ -126,10 +126,10 @@ bruhat(m::AbstractGL₂) = (b = Bruhat(m); (b.u, b.w, b.D, b.U))
 # GL₂{q}
 
 mutable struct GL₂{q} <: AbstractGL₂{q}
-    a::IntMod{q}
-    c::IntMod{q}
-    b::IntMod{q}
-    d::IntMod{q}
+    a::GF{q}
+    c::GF{q}
+    b::GF{q}
+    d::GF{q}
 
     function GL₂{q}(a,c,b,d) where q
         @assert q isa Integer
@@ -153,10 +153,10 @@ order(::Type{GL₂{q}}) where q = (q^2 - 1)*(q^2 - q)
 # SL₂{q}
 
 mutable struct SL₂{q} <: AbstractGL₂{q}
-    a::IntMod{q}
-    c::IntMod{q}
-    b::IntMod{q}
-    d::IntMod{q}
+    a::GF{q}
+    c::GF{q}
+    b::GF{q}
+    d::GF{q}
 
     function SL₂{q}(a,c,b,d) where q
         @assert q isa Integer
@@ -180,10 +180,10 @@ order(::Type{SL₂{q}}) where q = q^3 - q
 # PGL₂{q}
 
 mutable struct PGL₂{q} <: AbstractGL₂{q}
-    a::IntMod{q}
-    c::IntMod{q}
-    b::IntMod{q}
-    d::IntMod{q}
+    a::GF{q}
+    c::GF{q}
+    b::GF{q}
+    d::GF{q}
 
     function PGL₂{q}(a,c,b,d) where q
         @assert q isa Integer
@@ -217,10 +217,10 @@ order(::Type{PGL₂{q}}) where q = q^3 - q
 # PSL₂{q}
 
 mutable struct PSL₂{q} <: AbstractGL₂{q}
-    a::IntMod{q}
-    c::IntMod{q}
-    b::IntMod{q}
-    d::IntMod{q}
+    a::GF{q}
+    c::GF{q}
+    b::GF{q}
+    d::GF{q}
 
     function PSL₂{q}(a,c,b,d) where q
         @assert q isa Integer

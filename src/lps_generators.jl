@@ -77,7 +77,7 @@ function lps_generators(p::Integer, q::Integer)
 	@assert p % 4 == 1
 	@assert q % 4 == 1
 
-	i = sqrt(IntMod{q}(q-1))
+	i = sqrt(GF{q}(q-1))
 
 	mats = [generator(a₀,a₁,a₂,a₃,i) for (a₀,a₁,a₂,a₃) in quadruples(p)]
 

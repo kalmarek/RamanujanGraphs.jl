@@ -14,7 +14,7 @@
     @test all(b == prod(bruhat(b)) for b in SL2q)
 
     coset_reps = let α = RamanujanGraphs.generator(first(SL2q)[1])
-        borel_coset_representative(u::IntMod{q}) = SL₂{q}(0, -1, 1, -u)
+        borel_coset_representative(u::GF{q}) = SL₂{q}(0, -1, 1, -u)
         borel_coset_representative(q::Int) = one(SL₂{q})
         reps = [
             [borel_coset_representative(α^i) for i in 2:2:q-1];

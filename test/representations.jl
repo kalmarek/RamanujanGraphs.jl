@@ -13,7 +13,7 @@
     # characteristic(::Type{<:AbstractGL₂{q}}) where q = q
 
     coset_reps = let α = RamanujanGraphs.generator(first(SL2q)[1])
-        borel_coset_representative(u::IntMod{q}) = SL₂{q}(0, -1, 1, -u)
+        borel_coset_representative(u::GF{q}) = SL₂{q}(0, -1, 1, -u)
         borel_coset_representative(q::Int) = one(SL₂{q})
         reps = [
             [borel_coset_representative(α^i) for i in 2:2:q-1];
@@ -26,7 +26,7 @@
 
 
     Borel_cd = CosetDecomposition(coset_reps, inv.(coset_reps), Borel(SL₂{q}))
-    α = RamanujanGraphs.generator(one(IntMod{q}))
+    α = RamanujanGraphs.generator(one(GF{q}))
     ϱ = PrincipalRepresentation(α=>1im, Borel_cd)
 
     @testset "specific basis" begin

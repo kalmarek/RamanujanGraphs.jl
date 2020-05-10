@@ -1,7 +1,7 @@
-struct IntMod{q} <: Number
+struct GF{q} <: Number
     value::Int16
 
-    function IntMod{q}(n) where q
+    function GF{q}(n) where q
         @assert q > 1
         k = (-q<n<q ? n : n%q)
         k = ifelse(k >= 0, k, k + q)
@@ -9,31 +9,31 @@ struct IntMod{q} <: Number
     end
 end
 
-int(n::IntMod) = n.value
+int(n::GF) = n.value
 
-Base.:(==)(n::IntMod{q}, m::IntMod{q}) where q = int(n) == int(m)
-# hash(RamanujanGraphs.IntMod) == 0x04fd9e474909f8bf
-Base.hash(n::IntMod{q}, h::UInt) where q = xor(0x04fd9e474909f8bf, hash(q, hash(int(n), h)))
+Base.:(==)(n::GF{q}, m::GF{q}) where q = int(n) == int(m)
+# hash(RamanujanGraphs.GF) == 0x04fd9e474909f8bf
+Base.hash(n::GF{q}, h::UInt) where q = xor(0x04fd9e474909f8bf, hash(q, hash(int(n), h)))
 
-Base.:+(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) + int(m))
-Base.:-(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) - int(m))
-Base.:*(n::IntMod{q}, m::IntMod{q}) where q = IntMod{q}(int(n) * int(m))
-Base.:/(n::IntMod{q}, m::IntMod{q}) where q = n*inv(m)
+Base.:+(n::GF{q}, m::GF{q}) where q = GF{q}(int(n) + int(m))
+Base.:-(n::GF{q}, m::GF{q}) where q = GF{q}(int(n) - int(m))
+Base.:*(n::GF{q}, m::GF{q}) where q = GF{q}(int(n) * int(m))
+Base.:/(n::GF{q}, m::GF{q}) where q = n*inv(m)
 
-Base.:-(n::IntMod{q}) where q = IntMod{q}(q - int(n))
-Base.inv(n::IntMod{q}) where q = IntMod{q}(invmod(int(n), q))
+Base.:-(n::GF{q}) where q = GF{q}(q - int(n))
+Base.inv(n::GF{q}) where q = GF{q}(invmod(int(n), q))
 
-function Base.:^(n::IntMod{q}, i::Integer) where q
+function Base.:^(n::GF{q}, i::Integer) where q
    i < 0 && return inv(n)^-i
-   return IntMod{q}(powermod(int(n), i, q))
+   return GF{q}(powermod(int(n), i, q))
 end
 
-Base.zero(::Type{IntMod{q}}) where q = IntMod{q}(0)
-Base.one(::Type{IntMod{q}}) where q = IntMod{q}(1)
-Base.iszero(n::IntMod) = int(n) == 0
-Base.isone(n::IntMod) = int(n) == 1
+Base.zero(::Type{GF{q}}) where q = GF{q}(0)
+Base.one(::Type{GF{q}}) where q = GF{q}(1)
+Base.iszero(n::GF) = int(n) == 0
+Base.isone(n::GF) = int(n) == 1
 
-Base.promote_rule(::Type{IntMod{q}}, ::Type{I}) where {q, I<:Integer} = IntMod{q}
+Base.promote_rule(::Type{GF{q}}, ::Type{I}) where {q, I<:Integer} = GF{q}
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
@@ -43,15 +43,15 @@ function subscriptify(n::Integer)
     return Char(subscript_0 + n)
 end
 
-Base.show(io::IO, n::IntMod{q}) where q =
+Base.show(io::IO, n::GF{q}) where q =
     print(io, "$(int(n))"*join(subscriptify.(reverse(digits(q))), ""))
 
 import Base: <, <=
 for ord in [:<, :(<=)]
     @eval begin
-        $ord(n::IntMod{q}, m::IntMod{q}) where q = $ord(int(n),int(m))
-        $ord(n::IntMod, y::Number) = $ord(int(n), y)
-        $ord(y::Number, n::IntMod) = $ord(y, int(n))
+        $ord(n::GF{q}, m::GF{q}) where q = $ord(int(n),int(m))
+        $ord(n::GF, y::Number) = $ord(int(n), y)
+        $ord(y::Number, n::GF) = $ord(y, int(n))
     end
 end
 
@@ -61,14 +61,14 @@ function legendresymbol(n, q)
     return -one(n)
 end
 
-function generator(n::IntMod{q}) where q
+function generator(n::GF{q}) where q
     for i in 2:q-1
-        isone(-legendresymbol(i, q)) && return IntMod{q}(i)
+        isone(-legendresymbol(i, q)) && return GF{q}(i)
     end
     return zero(n) # never hit, to keep compiler happy
 end
 
-Base.sqrt(n::IntMod{q}) where q = IntMod{q}(sqrtmod(int(n), q))
+Base.sqrt(n::GF{q}) where q = GF{q}(sqrtmod(int(n), q))
 
 function sqrtmod(n::Integer, q::Integer)
     l = legendresymbol(n, q)

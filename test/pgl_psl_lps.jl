@@ -1,8 +1,8 @@
-@testset "IntMod" begin
+@testset "GF" begin
     q = 67
     for i in 1:q
         if isone(RamanujanGraphs.legendresymbol(i, q))
-            a = RamanujanGraphs.IntMod{q}(i)
+            a = RamanujanGraphs.GF{q}(i)
             @test sqrt(a)^2 == a
         end
     end
@@ -14,7 +14,7 @@ end
         m = PGL₂{5}(-4, 2 , 6, 4)
         @test m == PGL₂{5}(1, 2, 1, 4)
         @test det(m) == 2
-        @test det(m) isa RamanujanGraphs.IntMod{5}
+        @test det(m) isa RamanujanGraphs.GF{5}
         @test inv(det(m)) == 3
         @test m*m == PGL₂{5}(3, 0, 0, 3)
         @test m^2 == PGL₂{5}(1, 0, 0, 1)
