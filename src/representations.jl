@@ -3,16 +3,22 @@ struct Weyl end
 
 abstract type AbstractRepresentation{T} end
 
-struct PrincipalRepresentation{G,T,GL} <: AbstractRepresentation{T}
+struct PrincipalRepresentation{G,T,GL<:AbstractGL₂} <: AbstractRepresentation{T}
     # ψ(α), the value of a character ψ:K → ℂ
     # for a given generator of K
-    character_value::Pair{G,T}
+    character::Dict{G,T}
     borel_cd::CosetDecomposition{GL,Borel{GL}}
+
+    function PrincipalRepresentation(α_ψα::Pair{G, T},  boreldec::CosetDecomposition{GL, Borel{GL}}) where
+        {G, T, q, GL<:AbstractGL₂{q}}
+        α, ψα = α_ψα
+        new{G, T, GL}(Dict(α^j=>ψα^j for j in 1:q), boreldec)
+    end
 end
 
 function Base.show(io::IO, ϱ::PrincipalRepresentation{GF{q}, T, GL}) where {q, T, GL}
     println(io, "Principal series representation of $GL")
-    print(io, " · associated character of 𝔽_q: ", ϱ.character_value)
+    print(io, " · associated character of 𝔽_q: ", ϱ.character)
 end
 
 function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(m::SL₂{q}) where {q,T}
@@ -27,11 +33,11 @@ function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(
     ::Type{Unipotent},
 ) where {T,q}
 
-    α, ψα = ϱ.character_value
-    ϱU = fill(zero(ψα), q + 1, q + 1)
+    𝟏 = one(last(first(ϱ.character)))
+    ϱU = fill(zero(𝟏), q + 1, q + 1)
 
     for (i, pi) in zip(1:length(ϱ.borel_cd), right_action(U, ϱ.borel_cd))
-        ϱU[pi, i] = one(ψα)
+        ϱU[pi, i] = 𝟏
     end
 
     return ϱU
@@ -42,19 +48,17 @@ function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(
     ::Type{Diagonal},
 ) where {T,q}
     a = D[1]
-    α, ψα = ϱ.character_value
-    ψα_inv = inv(ψα)
-    ϱD = fill(zero(ψα), q + 1, q + 1)
-
-    j = something(findfirst(j -> α^j == a, 1:q), 0)
+    ψa = ϱ.character[a]
+    ψa_inv = inv(ψa)
+    ϱD = fill(zero(ψa), q + 1, q + 1)
 
     perm_repr = right_action(D, ϱ.borel_cd)
 
     for (i, pi) in zip(1:length(ϱ.borel_cd), perm_repr)
         if ϱ.borel_cd[i] ∈ ϱ.borel_cd.trivial_coset
-            ϱD[i, pi] = ψα^j
+            ϱD[i, pi] = ψa
         else
-            ϱD[i, pi] = ψα_inv^j
+            ϱD[i, pi] = ψa_inv
         end
     end
 
@@ -62,32 +66,29 @@ function (ϱ::PrincipalRepresentation{GF{q},T,SL₂{q}})(
 end
 
 function (ϱ::PrincipalRepresentation{GF{q},T})(
-    w::SL₂{q},
-    ::Type{Weyl},
-) where {T,q}
-    α, ψα = ϱ.character_value
-    ϱw = fill(zero(ψα), q + 1, q + 1)
+        w::SL₂{q}, ::Type{Weyl}) where {T,q}
 
-    exps = Dict(α^j => j for j = 1:q)
+    a, ψa = first(ϱ.character)
+    ϱw = fill(zero(ψa), q + 1, q + 1)
 
     perm_repr = right_action(w, ϱ.borel_cd)
 
     for (i, pi) in zip(1:length(ϱ.borel_cd), perm_repr)
         if ϱ.borel_cd[i] ∈ ϱ.borel_cd.trivial_coset
-            ϱw[i, pi] = ψα^exps[-one(α)] # ψ(-1)
+            ϱw[i, pi] = ϱ.character[-one(a)] # ψ(-1)
         elseif w * ϱ.borel_cd[-i] ∈ ϱ.borel_cd.trivial_coset
-            ϱw[i, pi] = one(ψα)
+            ϱw[i, pi] = one(ϱw[i, pi])
         else
             repr = ϱ.borel_cd[i]
-            # [ c    0 ][ 1 -a/c ] [ a b ]   [ 0    1 ]
-            # [ 0 -1/c ][ 0    1 ] [ c d ]   [-1 -d/c ]
+            # [ c    0 ][ 1 -a/c ][ a b ] =  [ 0    1 ]
+            # [ 0 -1/c ][ 0    1 ][ c d ]    [-1 -d/c ]
             c, d = repr[2], repr[4]
             # we deal with the trivial coset above
-            @assert !iszero(c) #
+            @assert !iszero(c)
             # we deal with the coset of w above
-            @assert !iszero(d) #
+            @assert !iszero(d)
             u = -d / c
-            ϱw[i, pi] = ψα^exps[-inv(u)]
+            ϱw[i, pi] = ϱ.character[-inv(u)]
         end
     end
     return ϱw
