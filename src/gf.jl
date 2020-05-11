@@ -10,6 +10,8 @@ struct GF{q} <: Number
 end
 
 int(n::GF) = n.value
+characteristic(::Type{GF{q}}) where q = q
+characteristic(::GF{q}) where q = q
 
 Base.:(==)(n::GF{q}, m::GF{q}) where q = int(n) == int(m)
 # hash(RamanujanGraphs.GF) == 0x04fd9e474909f8bf

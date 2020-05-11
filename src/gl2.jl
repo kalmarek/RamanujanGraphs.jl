@@ -32,6 +32,8 @@ function Base.setindex!(m::AbstractGL₂, v, i::Integer)
 end
 
 ints(m::AbstractGL₂) = int(m[1]), int(m[2]), int(m[3]), int(m[4])
+characteristic(::Type{<:AbstractGL₂{q}}) where q = q
+characteristic(m::AbstractGL₂{q}) where q = q
 
 function Base.:(==)(m::T, n::T) where T <: AbstractGL₂
     m = normalform!(m)
@@ -60,7 +62,8 @@ function mul!(x::Number, m::T) where T<:AbstractGL₂
     return m
 end
 
-LinearAlgebra.det(m::AbstractGL₂{q}) where q = ((a,c,b,d) = ints(m); GF{q}(a*d-c*b))
+LinearAlgebra.det(m::AbstractGL₂{q}) where q =
+    ((a,c,b,d) = ints(m); GF{q}(a*d-c*b))
 
 function Base.inv(m::T) where {q, T <: AbstractGL₂{q}}
     a,c,b,d = ints(m)
@@ -102,18 +105,18 @@ end
 
 function Base.getproperty(bru::Bruhat{T}, S::Symbol) where T
     m = getfield(bru, :matrix)
-    a,c,b,d = m[1], m[2], m[3], m[4]
+    a,c,b,d = m[1,1], m[2,1], m[1,2], m[2,2]
     if S ∈ (:u, :w, :U, :D)
         if isupper(getfield(bru, :matrix)) # istrivial_weylcoset(bru)
             S === :u && return one(T)
             S === :w && return one(T)
-            S === :U && return T(1, 0, b*inv(a), 1)
+            S === :U && return T(1, 0, b/a, 1)
             S === :D && return T(a, 0, 0, d)
         else
-            S === :u && return T(1, 0, a*inv(c), 1)
+            S === :u && return T(1, 0, a/c, 1)
             S === :w && return T(0, -1, 1, 0)
-            S === :D && return T(-c, 0, 0, -(a*d - b*c)*inv(c))
-            S === :U && return T(1, 0, d*inv(c), 1)
+            S === :D && return T(-c, 0, 0, -(a*d - b*c)/c)
+            S === :U && return T(1, 0, d/c, 1)
         end
     else
         return getfield(bru, S)
