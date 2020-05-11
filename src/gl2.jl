@@ -141,8 +141,6 @@ mutable struct GL₂{q} <: AbstractGL₂{q}
         @assert !iszero(det(m)) "Singular Matrix in GL₂{$q}: $m"
         return m
     end
-
-    GL₂{q}(m::AbstractMatrix) where q = GL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
 isnormal(m::GL₂) = true
@@ -168,8 +166,6 @@ mutable struct SL₂{q} <: AbstractGL₂{q}
         @assert isone(det(m)) "Matrix of determinant ≠ 1 in SL₂{$q}: $m"
         return m
     end
-
-    SL₂{q}(m::AbstractMatrix) where q = SL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
 isnormal(m::SL₂) = true
@@ -196,8 +192,6 @@ mutable struct PGL₂{q} <: AbstractGL₂{q}
         @assert !iszero(det(m)) "Singular Matrix in PGL₂{$q}: $m"
         return m
     end
-
-    PGL₂{q}(m::AbstractMatrix) where q = PGL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
 isnormal(m::PGL₂) = isone(m[1]) || (iszero(m[1]) && isone(m[2]))
@@ -233,8 +227,6 @@ mutable struct PSL₂{q} <: AbstractGL₂{q}
         @assert isone(det(m)) "Matrix of determinant ≠ 1 in PSL₂{$q}: $m"
         return m
     end
-
-    PSL₂{q}(m::AbstractMatrix) where q = PSL₂{q}(m[1,1], m[2,1], m[1,2], m[2,2])
 end
 
 function isnormal(m::PSL₂{q}) where q
@@ -270,3 +262,15 @@ function normalform!(m::PSL₂{q}) where q
 end
 
 order(::Type{PSL₂{q}}) where q = div(q^3 - q, 2)
+
+############################################
+# convenience constructors
+
+for GL in (GL₂, SL₂, PGL₂, PSL₂)
+    @eval begin
+        function $GL{q}(m::AbstractMatrix) where q
+            @assert size(m) == (2,2)
+            return $GL{q}(m[1,1], m[2,1], m[1,2], m[2,2])
+        end
+    end
+end
