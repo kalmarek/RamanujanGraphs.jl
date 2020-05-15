@@ -83,3 +83,8 @@ function sqrtmod(n::Integer, q::Integer)
     end
     return zero(n) # never hit, to keep compiler happy
 end
+
+order(::Type{GF{q}}) where q = q
+Base.iterate(::Type{GF{q}}, s=1) where q = s > q ? nothing : (GF{q}(s), s+1)
+Base.eltype(::Type{GF{q}}) where q = GF{q}
+Base.size(gf::Type{<:GF}) = (order(gf),)
