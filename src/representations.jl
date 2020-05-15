@@ -36,11 +36,11 @@ end
 
 function (ϱ::PrincipalRepr{GF{q},T,SL₂{q}})(U::SL₂{q},::Type{Unipotent}) where {q, T}
 
-    𝟏 = one(last(first(ϱ.character)))
-    ϱU = fill(zero(𝟏), degree(ϱ), degree(ϱ))
+    𝟙 = one(T)
+    ϱU = fill(zero(𝟙), degree(ϱ), degree(ϱ))
 
     for (i, pi) in zip(1:degree(ϱ), right_action(U, ϱ.borel_cd))
-        ϱU[i, pi] = 𝟏
+        ϱU[i, pi] = 𝟙
     end
 
     return ϱU
@@ -67,16 +67,15 @@ end
 
 function (ϱ::PrincipalRepr{GF{q},T})(w::SL₂{q}, ::Type{Weyl}) where {q, T}
 
-    a, ψa = first(ϱ.character)
-    ϱw = fill(zero(ψa), degree(ϱ), degree(ϱ))
+    ϱw = fill(zero(T), degree(ϱ), degree(ϱ))
 
     perm_repr = right_action(w, ϱ.borel_cd)
 
     for (i, pi) in zip(1:degree(ϱ), perm_repr)
         if ϱ.borel_cd[i] ∈ ϱ.borel_cd.trivial_coset
-            ϱw[i, pi] = ϱ.character[-one(a)] # ψ(-1)
+            ϱw[i, pi] = ϱ.character[GF{q}(-1)] # ψ(-1)
         elseif w * ϱ.borel_cd[-i] ∈ ϱ.borel_cd.trivial_coset
-            ϱw[i, pi] = one(ψa) # ψ(1)
+            ϱw[i, pi] = one(T) # ψ(1)
         else
             repr = ϱ.borel_cd[i]
             # [ c    0 ][ 1 -a/c ][ a b ] =  [ 0    1 ]
@@ -87,8 +86,9 @@ function (ϱ::PrincipalRepr{GF{q},T})(w::SL₂{q}, ::Type{Weyl}) where {q, T}
             # we deal with the coset of w above
             @assert !iszero(d)
             u = -d / c
-            ϱw[i, pi] = ϱ.character[-inv(u)]
+            ϱw[i, pi] = ϱ.character[inv(u)]
         end
     end
     return ϱw
 end
+

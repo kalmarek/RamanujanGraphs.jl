@@ -49,9 +49,7 @@
 
         @test ϱ(SL2q[2]*SL2q[3]) == ϱ(SL2q[2])*ϱ(SL2q[3])
 
-        for g in SL2q
-            @test all(ϱ(g*h) == ϱ(g)*ϱ(h) for h in SL2q)
-        end
+        @test all(ϱ(g*h) == ϱ(g)*ϱ(h) for g in SL2q for h in SL2q)
     end
 
     for val in [1, im, -1, -im]
@@ -78,9 +76,7 @@
 
             @test ϱ(SL2q[2]*SL2q[3]) == ϱ(SL2q[2])*ϱ(SL2q[3])
 
-            for g in SL2q
-                @test all(ϱ(g*h) == ϱ(g)*ϱ(h) for h in SL2q)
-            end
+            @test all(ϱ(g*h) == ϱ(g)*ϱ(h) for g in SL2q for h in SL2q)
         end
     end
 end
