@@ -1,5 +1,7 @@
 @testset "Coset decompositions" begin
 
+    import RamanujanGraphs: CosetDecomposition, right_action
+
     q = 31
 
     SL2q = let

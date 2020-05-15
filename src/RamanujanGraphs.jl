@@ -5,7 +5,7 @@ using LinearAlgebra
 using LightGraphs
 
 export lps_generators, cayley_graph, lps
-export GF, GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat
+export GF, GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat, QuadraticExt
 export issqrt, generator
 export PrincipalRepr, CosetDecomposition, right_action, order
 

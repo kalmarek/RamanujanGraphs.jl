@@ -94,7 +94,7 @@ function lps(p::Integer, q::Integer)
     S = lps_generators(p,q)
     G, verts, vlabels, elabels = cayley_graph(order(eltype(S)), S)
     @assert order(eltype(S)) == length(verts)
-    @assert all(isequal(p+1), degree(G))
+    @assert all(isequal(p+1), LightGraphs.degree(G))
     return G, verts, vlabels, elabels
 end
 
