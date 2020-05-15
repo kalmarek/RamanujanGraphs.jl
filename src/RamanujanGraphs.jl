@@ -10,6 +10,7 @@ export issqrt, generator
 export PrincipalRepr, CosetDecomposition, right_action, order
 
 include("gf.jl")
+include("quadraticext.jl")
 include("gl2.jl")
 include("borel.jl")
 include("coset_decomposition.jl")
