@@ -27,7 +27,7 @@
 
     Borel_cd = CosetDecomposition(coset_reps, inv.(coset_reps), Borel(SL₂{q}))
     α = RamanujanGraphs.generator(one(GF{q}))
-    ϱ = PrincipalRepresentation(α=>1im, Borel_cd)
+    ϱ = PrincipalRepr(α=>1im, Borel_cd)
 
     @testset "specific basis" begin
 
@@ -55,7 +55,7 @@
     end
 
     for val in [1, im, -1, -im]
-        ϱ = PrincipalRepresentation(α=>val,
+        ϱ = PrincipalRepr(α=>val,
             CosetDecomposition(SL2q, Borel(SL₂{q})))
 
         @testset "arbirtrary basis: $val" begin
