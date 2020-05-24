@@ -41,12 +41,10 @@ Base.promote_rule(::Type{GF{q}}, ::Type{I}) where {q, I<:Integer} = GF{q}
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
 function subscriptify(n::Integer)
     subscript_0 = Int(0x2080) # Char(0x2080) -> subscript 0
-    @assert 0 <= n <= 9
-    return Char(subscript_0 + n)
+    return join((Char(subscript_0 + d) for d in reverse(digits(n))), "")
 end
 
-Base.show(io::IO, n::GF{q}) where q =
-    print(io, "$(int(n))"*join(subscriptify.(reverse(digits(q))), ""))
+Base.show(io::IO, n::GF{q}) where q = print(io, "$(int(n))"*subscriptify(q))
 
 import Base: <, <=
 for ord in [:<, :(<=)]

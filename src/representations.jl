@@ -23,8 +23,9 @@ end
 degree(ϱ::PrincipalRepr{GF{q},T, SL₂{q}}) where {q, T} = q+1
 
 function Base.show(io::IO, ϱ::PrincipalRepr{GF{q}, T, GL}) where {q, T, GL}
+    α = first(first(ϱ.character))
     println(io, "Principal series representation of $GL")
-    print(io, "\tcharacter of 𝔽$(subscriptify(q))ˣ: ", ϱ.character)
+    print(io, "\tcharacter of 𝔽$(subscriptify(q))ˣ: ", α, " → ", ϱ.character[α])
 end
 
 function (ϱ::PrincipalRepr{GF{q},T,SL₂{q}})(m::SL₂{q}) where {q,T}
