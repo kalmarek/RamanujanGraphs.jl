@@ -109,8 +109,8 @@ function generator(x::QuadraticExt{ε,<:GF}) where {ε}
 end
 
 function _elt_of_norm(x::QuadraticExt{ε,T}, n::T) where {ε,T<:GF}
-    iszero(n) && return zero(n)
-    isone(n) && return one(n)
+    iszero(n) && return zero(x)
+    isone(n) && return one(x)
     for d in T
         c² = n + ε*d^2
         if RamanujanGraphs.issqrt(c²)

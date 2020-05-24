@@ -63,7 +63,9 @@ end
 
 function generator(n::GF{q}) where q
     for i in 2:q-1
-        isone(-legendresymbol(i, q)) && return GF{q}(i)
+        g = GF{q}(i)
+        any(isone, g^k for k in 2:q-2) && continue
+        return g
     end
     return zero(n) # never hit, to keep compiler happy
 end
