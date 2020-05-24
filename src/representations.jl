@@ -37,7 +37,7 @@ end
 
 function (ϱ::PrincipalRepr{GF{q},T,SL₂{q}})(U::SL₂{q},::Type{Unipotent}) where {q, T}
 
-    𝟙 = one(T)
+    𝟙 = one(last(first(ϱ.character)))
     ϱU = fill(zero(𝟙), degree(ϱ), degree(ϱ))
 
     for (i, pi) in zip(1:degree(ϱ), right_action(U, ϱ.borel_cd))
@@ -68,7 +68,8 @@ end
 
 function (ϱ::PrincipalRepr{GF{q},T})(w::SL₂{q}, ::Type{Weyl}) where {q, T}
 
-    ϱw = fill(zero(T), degree(ϱ), degree(ϱ))
+    𝟙 = one(last(first(ϱ.character)))
+    ϱw = fill(zero(𝟙), degree(ϱ), degree(ϱ))
 
     perm_repr = right_action(w, ϱ.borel_cd)
 
@@ -76,7 +77,7 @@ function (ϱ::PrincipalRepr{GF{q},T})(w::SL₂{q}, ::Type{Weyl}) where {q, T}
         if ϱ.borel_cd[i] ∈ ϱ.borel_cd.trivial_coset
             ϱw[i, pi] = ϱ.character[GF{q}(-1)] # ψ(-1)
         elseif w * ϱ.borel_cd[-i] ∈ ϱ.borel_cd.trivial_coset
-            ϱw[i, pi] = one(T) # ψ(1)
+            ϱw[i, pi] = 𝟙 # ψ(1)
         else
             repr = ϱ.borel_cd[i]
             # [ c    0 ][ 1 -a/c ][ a b ] =  [ 0    1 ]
