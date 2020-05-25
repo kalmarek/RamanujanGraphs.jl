@@ -94,18 +94,41 @@ end
 
 Base.iterate(u::Units{ε,T}, ::Nothing) where {ε,T} = nothing
 
-function generator(x::QuadraticExt{ε,<:GF}) where {ε}
+function order(x::QuadraticExt{ε,GF{q}}) where {ε, q}
+    w = one(x)
+    for i = 1:q^2-1
+        w *= x
+        isone(w) && return i
+    end
+    throw("Multiplicative order must be less than $(q^2-1)")
+end
+
+function generator(x::QuadraticExt{ε,GF{q}}) where {ε, q}
     y = _elt_of_norm(x, ε)
-    q = Int(int(ε))
 
     for u in Units(x)
         w = y * u
-        for i = 1:q^2-2
-            isone(w^i) && break
-        end
-        return w
+        order(w) == q^2-1 && return w
     end
     return zero(x) # never returned to keep compiler happy
+end
+
+function generator_min(x::QuadraticExt{ε,GF{q}}) where {ε, q}
+    g = zero(x)
+    y = RamanujanGraphs._elt_of_norm(x, ε)
+    n = 2q^2
+
+    for u in RamanujanGraphs.Units(g)
+        w = u*y
+        if RamanujanGraphs.order(w) == q^2-1
+            k = sum(RamanujanGraphs.int.(reim(w)).^2)
+            if k < n
+                g = w
+                n = k
+            end
+        end
+    end
+    return g
 end
 
 function _elt_of_norm(x::QuadraticExt{ε,T}, n::T) where {ε,T<:GF}
