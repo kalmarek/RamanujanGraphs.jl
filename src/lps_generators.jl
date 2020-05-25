@@ -77,7 +77,7 @@ function lps_generators(p::Integer, q::Integer)
 	@assert p % 4 == 1
 	@assert q % 4 == 1
 
-	i = sqrt(IntMod{q}(q-1))
+	i = sqrt(GF{q}(q-1))
 
 	mats = [generator(a₀,a₁,a₂,a₃,i) for (a₀,a₁,a₂,a₃) in quadruples(p)]
 
@@ -88,4 +88,25 @@ function lps_generators(p::Integer, q::Integer)
 	@assert all(inv(s) in S for s in S)
 	@assert all((!isone).(S))
     return S
+end
+
+function lps(p::Integer, q::Integer)
+    S = lps_generators(p,q)
+    G, verts, vlabels, elabels = cayley_graph(order(eltype(S)), S)
+    @assert order(eltype(S)) == length(verts)
+    @assert all(isequal(p+1), LightGraphs.degree(G))
+    return G, verts, vlabels, elabels
+end
+
+function lps(p::Integer, q::Integer, radius::Integer)
+    S = lps_generators(p,q)
+    G, verts, vlabels, elabels = cayley_graph(S, radius=radius)
+    radius < diameter_ub(p,q) && @warn "Radius given is smaller than its upper bound, cayley graph might be not complete!"
+    return G, verts, labels, elabels
+end
+
+# from Lubotzky-Phillips-Sarnak
+function diameter_ub(p::Integer, q::Integer)
+    n = order(PGLtype(p,q))
+    return floor(Int, 2log(p, n) + 2log(p,2) + 1)
 end
