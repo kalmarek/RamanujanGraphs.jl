@@ -3,13 +3,11 @@ struct GF{q} <: Number
 
     function GF{q}(n) where {q}
         @assert q > 1
-        k = (-q < n < q ? n : n % q)
-        k = ifelse(k >= 0, k, k + q)
-        return new{q}(k)
+        return new{q}(mod(n,q))
     end
 end
 
-int(n::GF) = n.value
+int(n::GF) = Int(n.value)
 characteristic(::Type{GF{q}}) where {q} = q
 characteristic(::GF{q}) where {q} = q
 
