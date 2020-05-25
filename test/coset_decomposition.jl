@@ -8,7 +8,10 @@
         a = SL₂{q}(1, 0, 1, 1)
         b = SL₂{q}(1, 1, 0, 1)
 
-        E, sizes = RamanujanGraphs.generate_balls([a,b, inv(a), inv(b)], radius=15);
+        E, sizes = RamanujanGraphs.generate_balls(
+            [a, b, inv(a), inv(b)],
+            radius = 15,
+        )
         @test sizes[end] == order(SL₂{q})
         E
     end
@@ -19,9 +22,9 @@
         borel_coset_representative(u::GF{q}) = SL₂{q}(0, -1, 1, -u)
         borel_coset_representative(q::Int) = one(SL₂{q})
         reps = [
-            [borel_coset_representative(α^i) for i in 2:2:q-1];
-            [borel_coset_representative(α^i) for i in 1:2:q-2];
-            [borel_coset_representative(0*α), borel_coset_representative(q)];
+            [borel_coset_representative(α^i) for i = 2:2:q-1]
+            [borel_coset_representative(α^i) for i = 1:2:q-2]
+            [borel_coset_representative(0 * α), borel_coset_representative(q)]
         ]
         @test length(unique(reps)) == length(reps)
         reps
@@ -29,15 +32,19 @@
 
     @testset "perm_repr" begin
 
-        function perm_repr(x::T, coset_representatives, trivial_coset) where T<:RamanujanGraphs.AbstractGL₂
+        function perm_repr(
+            x::T,
+            coset_representatives,
+            trivial_coset,
+        ) where {T<:RamanujanGraphs.AbstractGL₂}
 
             perm = zeros(Int, length(coset_representatives))
             inv_coset_representatives = inv.(coset_representatives)
 
-            for (i,c) in enumerate(coset_representatives)
-                a = c*x
+            for (i, c) in enumerate(coset_representatives)
+                a = c * x
                 for (j, inv_d) in enumerate(inv_coset_representatives)
-                    if a*inv_d ∈ trivial_coset
+                    if a * inv_d ∈ trivial_coset
                         perm[i] = j
                         break
                     end
@@ -47,8 +54,8 @@
             return perm
         end
 
-        let (id, a,b) = SL2q[1:3], Borel = Borel(SL₂{q})
-            perm_id =perm_repr(id, coset_reps, Borel)
+        let (id, a, b) = SL2q[1:3], Borel = Borel(SL₂{q})
+            perm_id = perm_repr(id, coset_reps, Borel)
             perm_a = perm_repr(a, coset_reps, Borel)
             perm_b = perm_repr(b, coset_reps, Borel)
 
@@ -61,22 +68,29 @@
             @test length(unique(perm_b)) == length(perm_b)
             @test sort(perm_a) == sort(perm_b) == 1:l
 
-            @test perm_repr(a^2, coset_reps, Borel) == [perm_a[perm_a[i]] for i in 1:l]
+            @test perm_repr(a^2, coset_reps, Borel) ==
+                  [perm_a[perm_a[i]] for i = 1:l]
 
-            @test perm_repr(b^2, coset_reps, Borel) == [perm_b[perm_b[i]] for i in 1:l]
+            @test perm_repr(b^2, coset_reps, Borel) ==
+                  [perm_b[perm_b[i]] for i = 1:l]
 
             @test [perm_a[i] for i in perm_repr(inv(a), coset_reps, Borel)] == 1:l
 
             @test [perm_b[i] for i in perm_repr(inv(b), coset_reps, Borel)] == 1:l
 
-            @test perm_repr(a*b, coset_reps, Borel) == [perm_b[perm_a[i]] for i in 1:l]
+            @test perm_repr(a * b, coset_reps, Borel) ==
+                  [perm_b[perm_a[i]] for i = 1:l]
         end
     end
 
     @testset "B\\SL₂{q} (left cosets)" begin
 
-        id, a,b = SL2q[1:3]
-        Bcosets = CosetDecomposition(coset_reps, inv.(coset_reps), Borel(eltype(SL2q)))
+        id, a, b = SL2q[1:3]
+        Bcosets = CosetDecomposition(
+            coset_reps,
+            inv.(coset_reps),
+            Borel(eltype(SL2q)),
+        )
 
         perm_id = right_action(id, Bcosets)
         perm_a = right_action(a, Bcosets)
@@ -103,34 +117,45 @@
             @test length(unique(perm_b)) == length(perm_b)
             @test sort(perm_a) == sort(perm_b) == 1:length(cd)
 
-            @test right_action(a^2, cd) == [perm_a[perm_a[i]] for i in 1:length(cd)]
+            @test right_action(a^2, cd) ==
+                  [perm_a[perm_a[i]] for i = 1:length(cd)]
 
-            @test right_action(b^2, cd) == [perm_b[perm_b[i]] for i in 1:length(cd)]
+            @test right_action(b^2, cd) ==
+                  [perm_b[perm_b[i]] for i = 1:length(cd)]
 
             @test [perm_a[i] for i in right_action(inv(a), cd)] == 1:length(cd)
 
             @test [perm_b[i] for i in right_action(inv(b), cd)] == 1:length(cd)
 
-            @test right_action(a*b, cd) == [perm_b[perm_a[i]] for i in 1:length(cd)]
+            @test right_action(a * b, cd) ==
+                  [perm_b[perm_a[i]] for i = 1:length(cd)]
         end
 
-        let cd = Bcosets, triv = findfirst(i -> cd[i] ∈ cd.trivial_coset, 1:length(cd))
+        let cd = Bcosets,
+            triv = findfirst(i -> cd[i] ∈ cd.trivial_coset, 1:length(cd))
 
-            @test all(cd[i]*cd[-i] ∈ cd.trivial_coset for i in 1:length(cd))
+            @test all(cd[i] * cd[-i] ∈ cd.trivial_coset for i = 1:length(cd))
             g = prod(rand(collect(cd.trivial_coset), 4))
 
-            @test all(right_action(g, cd)[triv] == triv for g in cd.trivial_coset)
+            @test all(
+                right_action(g, cd)[triv] == triv for g in cd.trivial_coset
+            )
 
             l = length(cd)
-            @test isone([cd[i]*cd[-j] ∈ cd.trivial_coset for i in 1:l, j in 1:l])
+            @test isone([
+                cd[i] * cd[-j] ∈ cd.trivial_coset for i = 1:l, j = 1:l
+            ])
 
-            @test all(right_action(cd[i], cd)[triv] == i for i in 1:length(cd))
+            @test all(right_action(cd[i], cd)[triv] == i for i = 1:length(cd))
 
             h = prod(rand(cd.representatives, 4))
-            @test sum(cd[i]*h ∈ cd.trivial_coset for i in 1:length(cd)) == 1
+            @test sum(cd[i] * h ∈ cd.trivial_coset for i = 1:length(cd)) == 1
 
             perm = right_action(h, cd)
-            @test all(cd[i]*h*cd[-j] ∈ cd.trivial_coset for (i,j) in enumerate(perm))
+            @test all(
+                cd[i] * h * cd[-j] ∈ cd.trivial_coset
+                for (i, j) in enumerate(perm)
+            )
 
             @test isperm(perm)
             perm
@@ -138,7 +163,7 @@
     end
 
     @testset "CosetDecomposition" begin
-        id, a,b = SL2q[1:3]
+        id, a, b = SL2q[1:3]
         Bcosets = CosetDecomposition(SL2q, Borel(SL₂{q}))
 
         perm_id = right_action(id, Bcosets)
@@ -168,34 +193,45 @@
             @test length(unique(perm_b)) == length(perm_b)
             @test sort(perm_a) == sort(perm_b) == 1:length(cd)
 
-            @test right_action(a^2, cd) == [perm_a[perm_a[i]] for i in 1:length(cd)]
+            @test right_action(a^2, cd) ==
+                  [perm_a[perm_a[i]] for i = 1:length(cd)]
 
-            @test right_action(b^2, cd) == [perm_b[perm_b[i]] for i in 1:length(cd)]
+            @test right_action(b^2, cd) ==
+                  [perm_b[perm_b[i]] for i = 1:length(cd)]
 
             @test [perm_a[i] for i in right_action(inv(a), cd)] == 1:length(cd)
 
             @test [perm_b[i] for i in right_action(inv(b), cd)] == 1:length(cd)
 
-            @test right_action(a*b, cd) == [perm_b[perm_a[i]] for i in 1:length(cd)]
+            @test right_action(a * b, cd) ==
+                  [perm_b[perm_a[i]] for i = 1:length(cd)]
         end
 
-        let cd = Bcosets, triv = findfirst(i -> cd[i] ∈ cd.trivial_coset, 1:length(cd))
+        let cd = Bcosets,
+            triv = findfirst(i -> cd[i] ∈ cd.trivial_coset, 1:length(cd))
 
-            @test all(cd[i]*cd[-i] ∈ cd.trivial_coset for i in 1:length(cd))
+            @test all(cd[i] * cd[-i] ∈ cd.trivial_coset for i = 1:length(cd))
             g = prod(rand(collect(cd.trivial_coset), 4))
 
-            @test all(right_action(g, cd)[triv] == triv for g in cd.trivial_coset)
+            @test all(
+                right_action(g, cd)[triv] == triv for g in cd.trivial_coset
+            )
 
             l = length(cd)
-            @test isone([cd[i]*cd[-j] ∈ cd.trivial_coset for i in 1:l, j in 1:l])
+            @test isone([
+                cd[i] * cd[-j] ∈ cd.trivial_coset for i = 1:l, j = 1:l
+            ])
 
-            @test all(right_action(cd[i], cd)[triv] == i for i in 1:length(cd))
+            @test all(right_action(cd[i], cd)[triv] == i for i = 1:length(cd))
 
             h = prod(rand(cd.representatives, 4))
-            @test sum(cd[i]*h ∈ cd.trivial_coset for i in 1:length(cd)) == 1
+            @test sum(cd[i] * h ∈ cd.trivial_coset for i = 1:length(cd)) == 1
 
             perm = right_action(h, cd)
-            @test all(cd[i]*h*cd[-j] ∈ cd.trivial_coset for (i,j) in enumerate(perm))
+            @test all(
+                cd[i] * h * cd[-j] ∈ cd.trivial_coset
+                for (i, j) in enumerate(perm)
+            )
 
             @test isperm(perm)
             perm
@@ -203,21 +239,22 @@
     end
 
     @testset "cross-checking CosetDecomposition" begin
-        Borel_cd = CosetDecomposition(coset_reps, inv.(coset_reps), Borel(SL₂{q}))
+        Borel_cd =
+            CosetDecomposition(coset_reps, inv.(coset_reps), Borel(SL₂{q}))
         cd = CosetDecomposition(SL2q, Borel(SL₂{q}))
 
-        @test all(cd[i]*cd[-i] ∈ cd.trivial_coset for i in 1:length(cd))
+        @test all(cd[i] * cd[-i] ∈ cd.trivial_coset for i = 1:length(cd))
         g = prod(rand(SL2q, 4))
 
-        @test sum(cd[i]*g ∈ cd.trivial_coset for i in 1:length(cd)) == 1
+        @test sum(cd[i] * g ∈ cd.trivial_coset for i = 1:length(cd)) == 1
 
         l = length(cd)
         m = zeros(Int, l, l)
 
-        for i in 1:l
-            for j in 1:l
-                if cd[i]*cd[-j] ∈ cd.trivial_coset
-                    m[i,j] = 1
+        for i = 1:l
+            for j = 1:l
+                if cd[i] * cd[-j] ∈ cd.trivial_coset
+                    m[i, j] = 1
                 end
             end
         end
@@ -226,9 +263,9 @@
 
         perm = zeros(Int, l)
 
-        for i in 1:l
-            for j in 1:l
-                if cd[i]*Borel_cd[-j] ∈ Borel_cd.trivial_coset
+        for i = 1:l
+            for j = 1:l
+                if cd[i] * Borel_cd[-j] ∈ Borel_cd.trivial_coset
                     perm[i] = j
                     # break
                 end
@@ -238,7 +275,7 @@
 
         Borel_reps = Borel_cd.representatives
         reps = cd.representatives
-        for i in 1:length(reps)
+        for i = 1:length(reps)
             @test reps[i] * inv(Borel_reps[perm[i]]) ∈ Borel_cd.trivial_coset
         end
     end

@@ -1,3 +1,7 @@
+[![Build Status](https://github.com/kalmarek/RamanujanGraphs.jl/workflows/CI/badge.svg)](https://github.com/kalmarek/RamanujanGraphs.jl/actions)
+![CI](https://github.com/kalmarek/RamanujanGraphs.jl/workflows/CI/badge.svg)
+[![codecov](https://github.com/kalmarek/RamanujanGraphs.jl/branch/master/graph/badge.svg)](https://github.com/kalmarek/RamanujanGraphs.jl)
+
 Following paper
 > _Ramanujan graphs_ by Lubotzky, A., Phillips, R. & Sarnak, P. Combinatorica (1988) 8: 261. https://doi.org/10.1007/BF02126799
 

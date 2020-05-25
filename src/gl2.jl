@@ -1,11 +1,11 @@
 abstract type AbstractGL₂{q} <: AbstractMatrix{GF} end
 
-Base.size(::AbstractGL₂) = (2,2)
+Base.size(::AbstractGL₂) = (2, 2)
 Base.length(::AbstractGL₂) = 4
 
-Base.one(::Type{T}) where T <: AbstractGL₂ = T(1, 0, 0, 1)
-Base.one(::T) where T <: AbstractGL₂ = one(T)
-Base.similar(::T) where T <: AbstractGL₂ = one(T)
+Base.one(::Type{T}) where {T<:AbstractGL₂} = T(1, 0, 0, 1)
+Base.one(::T) where {T<:AbstractGL₂} = one(T)
+Base.similar(::T) where {T<:AbstractGL₂} = one(T)
 
 Base.IndexStyle(::AbstractGL₂) = IndexLinear()
 
@@ -32,45 +32,45 @@ function Base.setindex!(m::AbstractGL₂, v, i::Integer)
 end
 
 ints(m::AbstractGL₂) = int(m[1]), int(m[2]), int(m[3]), int(m[4])
-characteristic(::Type{<:AbstractGL₂{q}}) where q = q
-characteristic(m::AbstractGL₂{q}) where q = q
+characteristic(::Type{<:AbstractGL₂{q}}) where {q} = q
+characteristic(m::AbstractGL₂{q}) where {q} = q
 
-function Base.:(==)(m::T, n::T) where T <: AbstractGL₂
+function Base.:(==)(m::T, n::T) where {T<:AbstractGL₂}
     m = normalform!(m)
     n = normalform!(n)
     return ints(m) == ints(n)
 end
 
-function Base.hash(m::T, h::UInt) where {q, T<:AbstractGL₂{q}}
+function Base.hash(m::T, h::UInt) where {q,T<:AbstractGL₂{q}}
     m = normalform!(m)
-    a,c,b,d = ints(m)
-    val = d + q*(b + q*(c + q*a)) # q-adic expression of m
+    a, c, b, d = ints(m)
+    val = d + q * (b + q * (c + q * a)) # q-adic expression of m
     return hash(T, hash(val, h))
 end
 
-function Base.:(*)(m::T, n::T) where T <: AbstractGL₂
-    a,c,b,d = ints(m)
-    A,C,B,D = ints(n)
-    return T(a*A + b*C, c*A + d*C, a*B + b*D, c*B + d*D)
+function Base.:(*)(m::T, n::T) where {T<:AbstractGL₂}
+    a, c, b, d = ints(m)
+    A, C, B, D = ints(n)
+    return T(a * A + b * C, c * A + d * C, a * B + b * D, c * B + d * D)
 end
 
-function mul!(x::Number, m::T) where T<:AbstractGL₂
-    m[1] = x*int(m[1])
-    m[2] = x*int(m[2])
-    m[3] = x*int(m[3])
-    m[4] = x*int(m[4])
+function mul!(x::Number, m::T) where {T<:AbstractGL₂}
+    m[1] = x * int(m[1])
+    m[2] = x * int(m[2])
+    m[3] = x * int(m[3])
+    m[4] = x * int(m[4])
     return m
 end
 
-LinearAlgebra.det(m::AbstractGL₂{q}) where q =
-    ((a,c,b,d) = ints(m); GF{q}(a*d-c*b))
+LinearAlgebra.det(m::AbstractGL₂{q}) where {q} =
+    ((a, c, b, d) = ints(m); GF{q}(a * d - c * b))
 
-function Base.inv(m::T) where {q, T <: AbstractGL₂{q}}
-    a,c,b,d = ints(m)
-    p = a*d - b*c
+function Base.inv(m::T) where {q,T<:AbstractGL₂{q}}
+    a, c, b, d = ints(m)
+    p = a * d - b * c
     p¯¹ = invmod(p, q)
 
-    return T(p¯¹*d, -p¯¹*c+q, -p¯¹*b+q, p¯¹*a)
+    return T(p¯¹ * d, -p¯¹ * c + q, -p¯¹ * b + q, p¯¹ * a)
 end
 
 isupper(m::AbstractGL₂) = iszero(m[2])
@@ -103,20 +103,20 @@ struct Bruhat{T<:AbstractGL₂}
     matrix::T
 end
 
-function Base.getproperty(bru::Bruhat{T}, S::Symbol) where T
+function Base.getproperty(bru::Bruhat{T}, S::Symbol) where {T}
     m = getfield(bru, :matrix)
-    a,c,b,d = m[1,1], m[2,1], m[1,2], m[2,2]
+    a, c, b, d = m[1, 1], m[2, 1], m[1, 2], m[2, 2]
     if S ∈ (:u, :w, :U, :D)
         if isupper(getfield(bru, :matrix)) # istrivial_weylcoset(bru)
             S === :u && return one(T)
             S === :w && return one(T)
-            S === :U && return T(1, 0, b/a, 1)
+            S === :U && return T(1, 0, b / a, 1)
             S === :D && return T(a, 0, 0, d)
         else
-            S === :u && return T(1, 0, a/c, 1)
+            S === :u && return T(1, 0, a / c, 1)
             S === :w && return T(0, -1, 1, 0)
-            S === :D && return T(-c, 0, 0, -(a*d - b*c)/c)
-            S === :U && return T(1, 0, d/c, 1)
+            S === :D && return T(-c, 0, 0, -(a * d - b * c) / c)
+            S === :U && return T(1, 0, d / c, 1)
         end
     else
         return getfield(bru, S)
@@ -134,10 +134,10 @@ mutable struct GL₂{q} <: AbstractGL₂{q}
     b::GF{q}
     d::GF{q}
 
-    function GL₂{q}(a,c,b,d) where q
+    function GL₂{q}(a, c, b, d) where {q}
         @assert q isa Integer
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
-        m = new{q}(a,c,b,d)
+        m = new{q}(a, c, b, d)
         @assert !iszero(det(m)) "Singular Matrix in GL₂{$q}: $m"
         return m
     end
@@ -147,7 +147,7 @@ isnormal(m::GL₂) = true
 
 normalform!(m::GL₂) = m
 
-order(::Type{GL₂{q}}) where q = (q^2 - 1)*(q^2 - q)
+order(::Type{GL₂{q}}) where {q} = (q^2 - 1) * (q^2 - q)
 
 
 ############################################
@@ -159,10 +159,10 @@ mutable struct SL₂{q} <: AbstractGL₂{q}
     b::GF{q}
     d::GF{q}
 
-    function SL₂{q}(a,c,b,d) where q
+    function SL₂{q}(a, c, b, d) where {q}
         @assert q isa Integer
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
-        m = new{q}(a,c,b,d)
+        m = new{q}(a, c, b, d)
         @assert isone(det(m)) "Matrix of determinant ≠ 1 in SL₂{$q}: $m"
         return m
     end
@@ -172,7 +172,7 @@ isnormal(m::SL₂) = true
 
 normalform!(m::SL₂) = m
 
-order(::Type{SL₂{q}}) where q = q^3 - q
+order(::Type{SL₂{q}}) where {q} = q^3 - q
 
 
 ############################################
@@ -184,10 +184,10 @@ mutable struct PGL₂{q} <: AbstractGL₂{q}
     b::GF{q}
     d::GF{q}
 
-    function PGL₂{q}(a,c,b,d) where q
+    function PGL₂{q}(a, c, b, d) where {q}
         @assert q isa Integer
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
-        m = new{q}(a,c,b,d)
+        m = new{q}(a, c, b, d)
         m = normalform!(m)
         @assert !iszero(det(m)) "Singular Matrix in PGL₂{$q}: $m"
         return m
@@ -207,7 +207,7 @@ function normalform!(m::PGL₂)
     return m
 end
 
-order(::Type{PGL₂{q}}) where q = q^3 - q
+order(::Type{PGL₂{q}}) where {q} = q^3 - q
 
 
 ############################################
@@ -219,28 +219,28 @@ mutable struct PSL₂{q} <: AbstractGL₂{q}
     b::GF{q}
     d::GF{q}
 
-    function PSL₂{q}(a,c,b,d) where q
+    function PSL₂{q}(a, c, b, d) where {q}
         @assert q isa Integer
         q > 1 || error(ArgumentError("$q (the modulus) must be > 1"))
-        m = new{q}(a,c,b,d)
+        m = new{q}(a, c, b, d)
         m = normalform!(m)
         @assert isone(det(m)) "Matrix of determinant ≠ 1 in PSL₂{$q}: $m"
         return m
     end
 end
 
-function isnormal(m::PSL₂{q}) where q
+function isnormal(m::PSL₂{q}) where {q}
     isone(det(m)) || return false
-    if 0 < m[1] <= div(q-1,2)
+    if 0 < m[1] <= div(q - 1, 2)
         return true
-    elseif iszero(m[1]) && 0 < m[2] <= div(q-1,2)
+    elseif iszero(m[1]) && 0 < m[2] <= div(q - 1, 2)
         return true
     else
         return false
     end
 end
 
-function normalform!(m::PSL₂{q}) where q
+function normalform!(m::PSL₂{q}) where {q}
     isnormal(m) && return m
     p = det(m)
     if isone(p)
@@ -252,7 +252,7 @@ function normalform!(m::PSL₂{q}) where q
 
     elt = ifelse(iszero(m[1]), m[2], m[1])
 
-    if xinv*elt > div(q-1, 2)
+    if xinv * elt > div(q - 1, 2)
         xinv = q - xinv
     end
 
@@ -261,16 +261,16 @@ function normalform!(m::PSL₂{q}) where q
     return m
 end
 
-order(::Type{PSL₂{q}}) where q = div(q^3 - q, 2)
+order(::Type{PSL₂{q}}) where {q} = div(q^3 - q, 2)
 
 ############################################
 # convenience constructors
 
 for GL in (GL₂, SL₂, PGL₂, PSL₂)
     @eval begin
-        function $GL{q}(m::AbstractMatrix) where q
-            @assert size(m) == (2,2)
-            return $GL{q}(m[1,1], m[2,1], m[1,2], m[2,2])
+        function $GL{q}(m::AbstractMatrix) where {q}
+            @assert size(m) == (2, 2)
+            return $GL{q}(m[1, 1], m[2, 1], m[1, 2], m[2, 2])
         end
     end
 end
