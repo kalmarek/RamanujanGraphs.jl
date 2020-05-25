@@ -15,31 +15,34 @@
         @test inv(L) isa QuadraticExt
         @test -L isa QuadraticExt
 
-        for (a,b) in ((L,L),(L,k))
-            @test a+b isa QuadraticExt
-            @test b+a isa QuadraticExt
-            @test a*b isa QuadraticExt
-            @test b*a isa QuadraticExt
+        for (a, b) in ((L, L), (L, k))
+            @test a + b isa QuadraticExt
+            @test b + a isa QuadraticExt
+            @test a * b isa QuadraticExt
+            @test b * a isa QuadraticExt
 
-            @test a/b isa QuadraticExt
-            @test b/a isa QuadraticExt
+            @test a / b isa QuadraticExt
+            @test b / a isa QuadraticExt
         end
     end
 
     C = RamanujanGraphs.Units(L)
-    @test length(C) == q+1
-    @test eltype(C) == QuadraticExt{k, typeof(k)}
+    @test length(C) == q + 1
+    @test eltype(C) == QuadraticExt{k,typeof(k)}
     @test collect(C) isa Vector{<:QuadraticExt}
     cC = collect(C)
 
-    @test last(cC) == QuadraticExt{k, GF{q}}((-1, 0))
+    @test last(cC) == QuadraticExt{k,GF{q}}((-1, 0))
     @test all(isone, norm.(C))
-    @test all(==(-RamanujanGraphs.sqroot(L)), norm.(RamanujanGraphs.oneim(L).*C))
+    @test all(
+        ==(-RamanujanGraphs.sqroot(L)),
+        norm.(RamanujanGraphs.oneim(L) .* C),
+    )
 
     l = generator(L)
-    @test length(unique!([l^i for i in 1:q^2-1])) == q^2-1
+    @test length(unique!([l^i for i = 1:q^2-1])) == q^2 - 1
     # frobenius map
-    @test all(isreal, (l^i)^(q+1) for i in 1:q^2-1)
+    @test all(isreal, (l^i)^(q + 1) for i = 1:q^2-1)
     # trace map
-    @test all(isreal, (l^i) + (l^i)^q for i in 1:q^2-1)
+    @test all(isreal, (l^i) + (l^i)^q for i = 1:q^2-1)
 end
