@@ -8,7 +8,7 @@
         a = SL₂{q}(1, 0, 1, 1)
         b = SL₂{q}(1, 1, 0, 1)
 
-        E, sizes = RamanujanGraphs.generate_balls([a,b, inv(a), inv(b)], radius=20);
+        E, sizes = RamanujanGraphs.generate_balls([a,b, inv(a), inv(b)], radius=15);
         @test sizes[end] == order(SL₂{q})
         E
     end
