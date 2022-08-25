@@ -60,7 +60,7 @@ function cayley_graph(S::AbstractVector{T}, radius::Integer = 10) where {T}
         end
     end
 
-    all(isequal(length(S)), LightGraphs.degree(cayley)) ||
+    all(isequal(length(S)), Graphs.degree(cayley)) ||
         @warn( "The degree is not constant = $(length(S)). A truncated part of the graph is returned.")
 
     return cayley, verts, vlabels, elabels
@@ -99,7 +99,7 @@ function cayley_graph(order::Integer, S::AbstractVector{T}) where {T}
     end
 
     verts_missing_edges =
-        findall(!isequal(length(S)), LightGraphs.degree(cayley))
+        findall(!isequal(length(S)), Graphs.degree(cayley))
 
     for v in verts_missing_edges
         seen_edges = T[]

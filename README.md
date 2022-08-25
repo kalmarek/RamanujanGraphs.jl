@@ -26,7 +26,7 @@ where
 Timings:
 
 ```julia
-julia> using RamanujanGraphs, RamanujanGraphs.LightGraphs
+julia> using RamanujanGraphs, RamanujanGraphs.Graphs
 
 julia> let (p,q) = (13,61)
            lps(p, q);

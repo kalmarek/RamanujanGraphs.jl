@@ -97,13 +97,13 @@ end
 
         c, vs, vls, els = cayley_graph(S, 6)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
-        @test all(isequal(p + 1), LightGraphs.degree(c))
+        @test all(isequal(p + 1), Graphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
 
         c, vs, vls, els = cayley_graph(S)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
-        @test all(isequal(p + 1), LightGraphs.degree(c))
+        @test all(isequal(p + 1), Graphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
     end
@@ -113,13 +113,13 @@ end
 
         c, vs, vls, els = cayley_graph(S, 6)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
-        @test all(isequal(p + 1), LightGraphs.degree(c))
+        @test all(isequal(p + 1), Graphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
 
         c, vs, vls, els = cayley_graph(S)
         @test length(vs) == RamanujanGraphs.order(eltype(vs))
-        @test all(isequal(p + 1), LightGraphs.degree(c))
+        @test all(isequal(p + 1), Graphs.degree(c))
         @test all(v in keys(vls) for v in vs)
         @test all(vls[vs[i]] == i for i in eachindex(vs))
     end
