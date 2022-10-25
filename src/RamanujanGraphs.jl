@@ -2,7 +2,7 @@ module RamanujanGraphs
 
 using Primes
 using LinearAlgebra
-using LightGraphs
+using Graphs
 
 export lps_generators, cayley_graph, lps
 export GF, GL₂, SL₂, PGL₂, PSL₂, Borel, Bruhat, bruhat, QuadraticExt

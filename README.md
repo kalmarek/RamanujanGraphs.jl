@@ -26,7 +26,7 @@ where
 Timings:
 
 ```julia
-julia> using RamanujanGraphs, RamanujanGraphs.LightGraphs
+julia> using RamanujanGraphs, RamanujanGraphs.Graphs
 
 julia> let (p,q) = (13,61)
            lps(p, q);
@@ -51,3 +51,79 @@ julia> let (p,q) = (13,73)
 └   size = 388944
 
 ```
+
+# Irreducible representations for _SL₂(p)_
+
+### Principal Series
+
+These representations are associated to the induced representations of _B(p)_,
+the _Borel subgroup_ (of upper triangular matrices) of _SL₂(p)_.
+All representations of the Borel subgroup come from the representations of the
+torus inside (i.e. diagonal matrices), hence are _1_-dimensional.
+
+Therefore to define a matrix representation of _SL₂(p)_ one needs to specify:
+ * a complex character of 𝔽ₚ (finite field of _p_ elements)
+ * an explicit set of representatives of _SL₂(p)/B(p)_.
+
+In code this can be specified by
+
+```julia
+p = 109 # our choice of a prime
+ζ = root_of_unity((p-1)÷2, ...) # ζ is (p-1)÷2 -th root of unity
+# two particular generators of SL₂(109):
+a = SL₂{p}([0 1; 108 11])
+b = SL₂{p}([57 2; 52 42])
+
+S = [a, b, inv(a), inv(b)] # symmetric generating set
+SL2p, _ = RamanujanGraphs.generate_balls(S, radius = 21)
+
+Borel_cosets = RamanujanGraphs.CosetDecomposition(SL2p, Borel(SL₂{p}))
+# the generator of 𝔽ₚˣ
+α = RamanujanGraphs.generator(RamanujanGraphs.GF{p}(0))
+
+ν₅ = let k = 5 # k runs from 0 to (p-1)÷4, or (p-3)÷4 depending on p (mod 4)
+  νₖ = PrincipalRepr(
+      α => ζ^k, # character sending α ↦ ζᵏ
+      Borel_cosets
+    )
+end
+
+```
+
+### Discrete Series
+
+These representations are associated with the action of _SL₂(p)_ (or in more
+generality of _GL₂(p)_) on ℂ[𝔽ₚˣ], the vector space of complex valued functions
+on 𝔽ₚˣ. There are however multiple choices how to encode such action.
+
+Let _L_ = 𝔽ₚ(√_α_) be the unique quadratic extension of 𝔽ₚ by a square of a
+generator _α_ of 𝔽ₚˣ. Comples characters of _Lˣ_ can be separated into
+_decomposable_ (the ones that take constant 1 value on the unique cyclic
+subgroup of order _(p+1)_ in _Lˣ_) and _nondecomposable_. Each _nondecomposable_
+character corresponds to a representation of _SL₂(p)_ in discrete series.
+
+To define matrix representatives one needs to specify
+* _χ_:𝔽ₚ⁺ → ℂ, a complex, non-trivial character of the _additive group_ of 𝔽ₚ
+* _ν_:_Lˣ_ → ℂ, a complex indecomposable character of _Lˣ_
+* a basis for ℂ[𝔽ₚ].
+
+Continuing the snippet above we can write
+
+```julia
+α = RamanujanGraphs.generator(RamanujanGraphs.GF{p}(0)) # a generator of 𝔽ₚˣ
+β = RamanujanGraphs.generator_min(QuadraticExt(α))
+# a generator of _Lˣ_ of minimal "Euclidean norm"
+
+ζₚ = root_of_unity(p, ...)
+ζ = root_of_unity(p+1, ...)
+
+ϱ₁₇ = let k = 17 # k runs from 1 to (p-1)÷4 or (p+1)÷4 depending on p (mod 4)
+    DiscreteRepr(
+    RamanujanGraphs.GF{p}(1) => ζₚ, # character of the additive group of 𝔽ₚ
+    β => ζ^k, # character of the multiplicative group of _L_
+    basis = [α^i for i in 1:p-1] # our choice for basis: the dual of
+)
+```
+
+A priori ζ needs to be a complex _(p²-1)_-th root of unity, however one can show
+that a reduction to _(p+1)_-th Cyclotomic field is possible.

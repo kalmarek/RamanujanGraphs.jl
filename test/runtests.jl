@@ -2,7 +2,7 @@ using Test
 
 using LinearAlgebra
 using RamanujanGraphs
-using LightGraphs
+using Graphs
 
 include("pgl_psl_lps.jl")
 include("quadraticext.jl")

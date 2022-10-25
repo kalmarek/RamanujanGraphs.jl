@@ -1,5 +1,5 @@
 using RamanujanGraphs
-using LightGraphs
+using Graphs
 
 let (p, q) = (13, 61)
     lps(p, q)
